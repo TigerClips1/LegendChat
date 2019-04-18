@@ -798,12 +798,8 @@ public class Commands implements CommandExecutor {
                                         mot = " " + arg;
                                     }
                                 }
-				if(mot.length()>0)
-					if(sender.hasPermission("legendchat.block.afkmotive")&&!sender.hasPermission("legendchat.admin")) {
-						sender.sendMessage(Legendchat.getMessageManager().getMessage("error6"));
-						return true;
-					}
-				Legendchat.getAfkManager().setAfk((Player)sender,mot);
+				Legendchat.getAfkManager().setAfk((Player)sender,
+						sender.hasPermission("legendchat.block.afkmotive") && !sender.hasPermission("legendchat.admin") ? "" : mot);
 				sender.sendMessage(Legendchat.getMessageManager().getMessage("message12"));
 				if(mot.length()==0 && !sender.hasPermission("legendchat.block.afkmotive"))
 					sender.sendMessage(Legendchat.getMessageManager().getMessage("wrongcmd").replace("@command", "/afk ["+Legendchat.getMessageManager().getMessage("reason")+"]"));
