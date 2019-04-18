@@ -127,7 +127,7 @@ public class ChannelUtils {
 						continue;
 					}
 			}
-			if(Legendchat.getIgnoreManager().hasPlayerIgnoredPlayer(p, sender.getName())) {
+			if(Legendchat.getIgnoreManager().hasPlayerIgnoredPlayer(p, sender.getName()) && !p.hasPermission("legendchat.block.ignore")) {
 				recipients.remove(p);
 				continue;
 			}
