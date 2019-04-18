@@ -709,6 +709,8 @@ public class Commands implements CommandExecutor {
 						sender.sendMessage(Legendchat.getMessageManager().getMessage("error6"));
 						return true;
 					}
+					Legendchat.getPrivateMessageManager().lockPlayerTell(sender, to);
+					sender.sendMessage(Legendchat.getMessageManager().getMessage("message10").replace("@player", to.getName()));
 					if(to!=console)
 						if(Legendchat.getAfkManager().isAfk((Player)to)) {
 							sender.sendMessage(Legendchat.getMessageManager().getMessage("pm_error2_1"));
@@ -716,10 +718,8 @@ public class Commands implements CommandExecutor {
 							if(mot!=null)
 								if(mot.length()>0)
 									sender.sendMessage(Legendchat.getMessageManager().getMessage("pm_error2_2").replace("@motive", mot));
-							return true;
+							//return true;
 						}
-					Legendchat.getPrivateMessageManager().lockPlayerTell(sender, to);
-					sender.sendMessage(Legendchat.getMessageManager().getMessage("message10").replace("@player", to.getName()));
 				}
 			}
 			else {
