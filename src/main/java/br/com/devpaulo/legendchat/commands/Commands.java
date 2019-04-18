@@ -805,7 +805,7 @@ public class Commands implements CommandExecutor {
 					}
 				Legendchat.getAfkManager().setAfk((Player)sender,mot);
 				sender.sendMessage(Legendchat.getMessageManager().getMessage("message12"));
-				if(mot.length()==0)
+				if(mot.length()==0 && !sender.hasPermission("legendchat.block.afkmotive"))
 					sender.sendMessage(Legendchat.getMessageManager().getMessage("wrongcmd").replace("@command", "/afk ["+Legendchat.getMessageManager().getMessage("reason")+"]"));
 			}
 			return true;
