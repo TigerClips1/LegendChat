@@ -340,7 +340,7 @@ public class ChannelUtils {
 	}
 	
 	public static String translateStringColor(String color) {
-		switch(color.toLowerCase()) {
+		switch(color.toLowerCase().replace("_", "")) {
 			case "black": {return ChatColor.BLACK.toString();}
 			case "darkblue": {return ChatColor.DARK_BLUE.toString();}
 			case "darkgreen": {return ChatColor.DARK_GREEN.toString();}
@@ -361,7 +361,7 @@ public class ChannelUtils {
 	}
 	
 	public static ChatColor translateStringColorToChatColor(String color) {
-		switch(color.toLowerCase()) {
+		switch(color.toLowerCase().replace("_", "")) {
 			case "black": {return ChatColor.BLACK;}
 			case "darkblue": {return ChatColor.DARK_BLUE;}
 			case "darkgreen": {return ChatColor.DARK_GREEN;}
