@@ -10,6 +10,7 @@ import net.milkbowl.vault.chat.Chat;
 import net.milkbowl.vault.economy.Economy;
 import net.milkbowl.vault.permission.Permission;
 
+import org.bukkit.command.PluginCommand;
 import org.bukkit.entity.Player;
 import org.bukkit.plugin.RegisteredServiceProvider;
 import org.bukkit.plugin.java.JavaPlugin;
@@ -42,14 +43,14 @@ public class Main extends JavaPlugin implements PluginMessageListener {
 		getLogger().log(Level.INFO, "Legendchat (V{0}) - Author: SubZero0", getDescription().getVersion());
 		Legendchat.load(false);
 		
-		getServer().getPluginCommand("legendchat").setExecutor(new Commands());
-		getServer().getPluginCommand("channel").setExecutor(new Commands());
-		getServer().getPluginCommand("tell").setExecutor(new Commands());
-		getServer().getPluginCommand("reply").setExecutor(new Commands());
-		getServer().getPluginCommand("afk").setExecutor(new Commands());
-		getServer().getPluginCommand("ignore").setExecutor(new Commands());
-		getServer().getPluginCommand("tempchannel").setExecutor(new Commands());
-		getServer().getPluginCommand("mute").setExecutor(new Commands());
+		Commands c = new Commands();
+		PluginCommand pc;
+		for(String cmd : new String[]{"legendchat", "channel", "tell", "reply", "afk", "ignore", "tempchannel", "mute"}) {
+			if((pc = getServer().getPluginCommand(cmd)) != null)
+				pc.setExecutor(c);
+			else 
+				getLogger().warning("Failed to register command: " + cmd);
+		}
 		
 		if(getConfig().getBoolean("use_async_chat_event",true))
 			getServer().getPluginManager().registerEvents(new Listeners(), this);
