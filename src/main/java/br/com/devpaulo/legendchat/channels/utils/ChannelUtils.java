@@ -22,6 +22,7 @@ import br.com.devpaulo.legendchat.channels.types.Channel;
 import br.com.devpaulo.legendchat.channels.types.TemporaryChannel;
 import br.com.devpaulo.legendchat.listeners.Listeners;
 import br.com.devpaulo.legendchat.listeners.Listeners_old;
+import me.clip.placeholderapi.PlaceholderAPI;
 
 @SuppressWarnings("deprecation")
 public class ChannelUtils {
@@ -234,6 +235,9 @@ public class ChannelUtils {
 			if(e.getTags().contains("suffix")&&e.getTags().contains("groupsuffix"))
 				if(e.getTagValue("suffix").equals(e.getTagValue("groupsuffix")))
 					e.setTagValue("suffix", "");
+		}
+		if(Bukkit.getServer().getPluginManager().isPluginEnabled("PlaceholderAPI")) {
+			completa = PlaceholderAPI.setBracketPlaceholders(sender, completa);
 		}
 		for(String n : e.getTags())
 			completa = completa.replace("{"+n+"}", ChatColor.translateAlternateColorCodes('&', e.getTagValue(n)));
