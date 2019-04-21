@@ -143,11 +143,11 @@ public class ChannelUtils {
 		boolean gastou = false;
 		if(!Main.block_econ&&c.getMessageCost()>0) {
 			if(!sender.hasPermission("legendchat.channel."+c.getName().toLowerCase()+".free")&&!sender.hasPermission("legendchat.admin")) {
-				if(Main.econ.getBalance(sender.getName())<c.getMessageCost()) {
+				if(Main.econ.getBalance(sender)<c.getMessageCost()) {
 					sender.sendMessage(Legendchat.getMessageManager().getMessage("error3").replace("@price", Double.toString(c.getMessageCost())));
 					return;
 				}
-				Main.econ.withdrawPlayer(sender.getName(), c.getMessageCost());
+				Main.econ.withdrawPlayer(sender, c.getMessageCost());
 				gastou=true;
 			}
 		}
