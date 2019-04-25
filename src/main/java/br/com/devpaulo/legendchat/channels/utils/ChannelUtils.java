@@ -32,22 +32,24 @@ public class ChannelUtils {
 			return;
 		}
 		if(!Legendchat.useAsyncChat()) {
-			PlayerChatEvent event = new PlayerChatEvent(sender, "legendchat");
+			PlayerChatEvent event = new PlayerChatEvent(sender, message);
 			Listeners_old.addFakeChat(event, false);
 			Bukkit.getPluginManager().callEvent(event);
-			c.sendMessage(sender, message, event.getFormat(), Listeners_old.getFakeChat(event));
+			if(!Listeners_old.getFakeChat(event))
+				c.sendMessage(sender, message, event.getFormat(), Listeners_old.getFakeChat(event));
 			Listeners_old.removeFakeChat(event);
 		}
 		else {
 			HashSet<Player> p = new HashSet<>();
 			p.add(sender);
-			final AsyncPlayerChatEvent event = new AsyncPlayerChatEvent(true, sender, "legendchat", p);
+			final AsyncPlayerChatEvent event = new AsyncPlayerChatEvent(true, sender, message, p);
 			Listeners.addFakeChat(event, false);
 			Bukkit.getScheduler().runTaskAsynchronously(Legendchat.getPlugin(), new Runnable() {
                                 @Override
 				public void run() {
 					Bukkit.getPluginManager().callEvent(event);
-					c.sendMessage(sender, message, event.getFormat(), Listeners.getFakeChat(event));
+					if(!Listeners.getFakeChat(event))
+						c.sendMessage(sender, message, event.getFormat(), Listeners.getFakeChat(event));
 					Listeners.removeFakeChat(event);
 				}
 			});
