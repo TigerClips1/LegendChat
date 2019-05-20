@@ -35,3 +35,8 @@ commands:
    mute:
       description: Ignore a channel.
       usage: /<command> <channel>
+      aliases: leave
+   me:
+      description: Sends a status message to your channel
+      usage: /<command> <message>
+       

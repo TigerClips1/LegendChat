@@ -127,7 +127,7 @@ public class ChannelUtils {
 						continue;
 					}
 			}
-			if(Legendchat.getIgnoreManager().hasPlayerIgnoredPlayer(p, sender.getName()) && !p.hasPermission("legendchat.block.ignore")) {
+			if(Legendchat.getIgnoreManager().hasPlayerIgnoredPlayer(p, sender.getName())) {
 				recipients.remove(p);
 				continue;
 			}
@@ -162,7 +162,7 @@ public class ChannelUtils {
 				name_code="%s";
 			int seploc = bukkit_format.indexOf(name_code);
 			int finalloc = -1;
-			for(int i=seploc;i>=0;i--)
+			for(int i=seploc;i>=0;--i)
 				if(bukkit_format.charAt(i)=='<') {
 					finalloc=i;
 					break;
@@ -340,7 +340,7 @@ public class ChannelUtils {
 	}
 	
 	public static String translateStringColor(String color) {
-		switch(color.toLowerCase().replace("_", "")) {
+		switch(color.toLowerCase()) {
 			case "black": {return ChatColor.BLACK.toString();}
 			case "darkblue": {return ChatColor.DARK_BLUE.toString();}
 			case "darkgreen": {return ChatColor.DARK_GREEN.toString();}
@@ -361,7 +361,7 @@ public class ChannelUtils {
 	}
 	
 	public static ChatColor translateStringColorToChatColor(String color) {
-		switch(color.toLowerCase().replace("_", "")) {
+		switch(color.toLowerCase()) {
 			case "black": {return ChatColor.BLACK;}
 			case "darkblue": {return ChatColor.DARK_BLUE;}
 			case "darkgreen": {return ChatColor.DARK_GREEN;}

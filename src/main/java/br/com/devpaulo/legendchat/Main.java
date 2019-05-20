@@ -45,9 +45,9 @@ public class Main extends JavaPlugin implements PluginMessageListener {
 		
 		Commands c = new Commands();
 		PluginCommand pc;
-		for(String cmd : new String[]{"legendchat", "channel", "tell", "reply", "afk", "ignore", "tempchannel", "mute"}) {
+		for(String cmd : new String[]{"legendchat", "channel", "tell", "reply", "afk", "ignore", "tempchannel", "mute", "me"}) {
 			if((pc = getServer().getPluginCommand(cmd)) != null)
-				pc.setExecutor(c);
+				c.registerCommand(pc);
 			else 
 				getLogger().warning("Failed to register command: " + cmd);
 		}
