@@ -22,7 +22,6 @@ import br.com.devpaulo.legendchat.channels.types.Channel;
 import br.com.devpaulo.legendchat.channels.types.TemporaryChannel;
 import br.com.devpaulo.legendchat.listeners.Listeners;
 import br.com.devpaulo.legendchat.listeners.Listeners_old;
-import me.clip.placeholderapi.PlaceholderAPI;
 
 @SuppressWarnings("deprecation")
 public class ChannelUtils {
@@ -32,24 +31,22 @@ public class ChannelUtils {
 			return;
 		}
 		if(!Legendchat.useAsyncChat()) {
-			PlayerChatEvent event = new PlayerChatEvent(sender, message);
+			PlayerChatEvent event = new PlayerChatEvent(sender, "legendchat");
 			Listeners_old.addFakeChat(event, false);
 			Bukkit.getPluginManager().callEvent(event);
-			if(!Listeners_old.getFakeChat(event))
-				c.sendMessage(sender, message, event.getFormat(), Listeners_old.getFakeChat(event));
+			c.sendMessage(sender, message, event.getFormat(), Listeners_old.getFakeChat(event));
 			Listeners_old.removeFakeChat(event);
 		}
 		else {
 			HashSet<Player> p = new HashSet<>();
 			p.add(sender);
-			final AsyncPlayerChatEvent event = new AsyncPlayerChatEvent(true, sender, message, p);
+			final AsyncPlayerChatEvent event = new AsyncPlayerChatEvent(true, sender, "legendchat", p);
 			Listeners.addFakeChat(event, false);
 			Bukkit.getScheduler().runTaskAsynchronously(Legendchat.getPlugin(), new Runnable() {
                                 @Override
 				public void run() {
 					Bukkit.getPluginManager().callEvent(event);
-					if(!Listeners.getFakeChat(event))
-						c.sendMessage(sender, message, event.getFormat(), Listeners.getFakeChat(event));
+					c.sendMessage(sender, message, event.getFormat(), Listeners.getFakeChat(event));
 					Listeners.removeFakeChat(event);
 				}
 			});
@@ -130,7 +127,7 @@ public class ChannelUtils {
 						continue;
 					}
 			}
-			if(Legendchat.getIgnoreManager().hasPlayerIgnoredPlayer(p, sender.getName()) && !p.hasPermission("legendchat.block.ignore")) {
+			if(Legendchat.getIgnoreManager().hasPlayerIgnoredPlayer(p, sender.getName())) {
 				recipients.remove(p);
 				continue;
 			}
@@ -146,11 +143,11 @@ public class ChannelUtils {
 		boolean gastou = false;
 		if(!Main.block_econ&&c.getMessageCost()>0) {
 			if(!sender.hasPermission("legendchat.channel."+c.getName().toLowerCase()+".free")&&!sender.hasPermission("legendchat.admin")) {
-				if(Main.econ.getBalance(sender)<c.getMessageCost()) {
+				if(Main.econ.getBalance(sender.getName())<c.getMessageCost()) {
 					sender.sendMessage(Legendchat.getMessageManager().getMessage("error3").replace("@price", Double.toString(c.getMessageCost())));
 					return;
 				}
-				Main.econ.withdrawPlayer(sender, c.getMessageCost());
+				Main.econ.withdrawPlayer(sender.getName(), c.getMessageCost());
 				gastou=true;
 			}
 		}
@@ -164,7 +161,12 @@ public class ChannelUtils {
 			else if(bukkit_format.contains("%s"))
 				name_code="%s";
 			int seploc = bukkit_format.indexOf(name_code);
-			int finalloc = bukkit_format.lastIndexOf('<', seploc);
+			int finalloc = -1;
+			for(int i=seploc;i>=0;--i)
+				if(bukkit_format.charAt(i)=='<') {
+					finalloc=i;
+					break;
+				}
 			if(finalloc!=-1) {
 				n_format_p_p = bukkit_format.substring(0, finalloc);
 				if(name_code!=null) {
@@ -233,9 +235,6 @@ public class ChannelUtils {
 				if(e.getTagValue("suffix").equals(e.getTagValue("groupsuffix")))
 					e.setTagValue("suffix", "");
 		}
-		if(Bukkit.getServer().getPluginManager().isPluginEnabled("PlaceholderAPI")) {
-			completa = PlaceholderAPI.setBracketPlaceholders(sender, completa);
-		}
 		for(String n : e.getTags())
 			completa = completa.replace("{"+n+"}", ChatColor.translateAlternateColorCodes('&', e.getTagValue(n)));
 		completa = completa.replace("{msg}", translateAlternateChatColorsWithPermission(sender, message));
@@ -292,7 +291,7 @@ public class ChannelUtils {
 						out.writeUTF(translateAlternateChatColorsWithPermission(sender, message));
 					} catch (IOException e1) {
 					}
-					sender.sendPluginMessage(Bukkit.getPluginManager().getPlugin("Legendchat"), ":legendchat", b.toByteArray());
+					sender.sendPluginMessage(Bukkit.getPluginManager().getPlugin("Legendchat"), "agnc:agnc", b.toByteArray());
 				}
 			}
 		}
@@ -341,7 +340,7 @@ public class ChannelUtils {
 	}
 	
 	public static String translateStringColor(String color) {
-		switch(color.toLowerCase().replace("_", "")) {
+		switch(color.toLowerCase()) {
 			case "black": {return ChatColor.BLACK.toString();}
 			case "darkblue": {return ChatColor.DARK_BLUE.toString();}
 			case "darkgreen": {return ChatColor.DARK_GREEN.toString();}
@@ -362,7 +361,7 @@ public class ChannelUtils {
 	}
 	
 	public static ChatColor translateStringColorToChatColor(String color) {
-		switch(color.toLowerCase().replace("_", "")) {
+		switch(color.toLowerCase()) {
 			case "black": {return ChatColor.BLACK;}
 			case "darkblue": {return ChatColor.DARK_BLUE;}
 			case "darkgreen": {return ChatColor.DARK_GREEN;}
