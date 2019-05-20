@@ -164,12 +164,7 @@ public class ChannelUtils {
 			else if(bukkit_format.contains("%s"))
 				name_code="%s";
 			int seploc = bukkit_format.indexOf(name_code);
-			int finalloc = -1;
-			for(int i=seploc;i>=0;i--)
-				if(bukkit_format.charAt(i)=='<') {
-					finalloc=i;
-					break;
-				}
+			int finalloc = bukkit_format.lastIndexOf('<', seploc);
 			if(finalloc!=-1) {
 				n_format_p_p = bukkit_format.substring(0, finalloc);
 				if(name_code!=null) {
