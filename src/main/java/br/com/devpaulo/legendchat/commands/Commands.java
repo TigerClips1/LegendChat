@@ -48,6 +48,7 @@ public class Commands implements CommandExecutor, TabCompleter {
 			break;
 			default:
 				command.setExecutor(this);
+				command.setTabCompleter(this);
 		}
 	}
 
@@ -134,7 +135,11 @@ public class Commands implements CommandExecutor, TabCompleter {
 					p.sendMessage(Legendchat.getMessageManager().getMessage("error1"));
                 
             } else {
-                Bukkit.getServer().broadcastMessage(ChatColor.ITALIC + "* Server " + msg.toString());
+				for(Player pl : Bukkit.getOnlinePlayers()) {
+					// todo? custom formatting?
+					// not really an important feature, just a bit of fun.
+					pl.sendMessage(ChatColor.ITALIC + "Server " + msg.toString());
+				}
             }
 			return true;
 		}

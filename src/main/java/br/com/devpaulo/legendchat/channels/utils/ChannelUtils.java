@@ -74,7 +74,7 @@ public class ChannelUtils {
 	}
 	
 	public static void realMe(Channel c, Player sender, String message, String bukkit_format, boolean cancelled) {
-		realMessage(c, sender, message, "%me_me%" + c.getMeFormat(), bukkit_format, cancelled);
+		realMessage(c, sender,  "* " + message + " *", "%me%" + c.getMeFormat(), bukkit_format, cancelled);
     }
 	
 	public static void realMessage(Channel c, Player sender, String message, String bukkit_format, boolean cancelled) {
@@ -87,31 +87,26 @@ public class ChannelUtils {
 				sender.sendMessage(Legendchat.getMessageManager().getMessage("tc_error8"));
 				return;
 			}
-		}
-		else {
-			if(!sender.hasPermission("legendchat.channel."+c.getName().toLowerCase()+".chat")&&!sender.hasPermission("legendchat.admin")) {
-				sender.sendMessage(Legendchat.getMessageManager().getMessage("error2"));
-				return;
-			}
-			if(sender.hasPermission("legendchat.channel."+c.getName().toLowerCase()+".blockwrite")&&!sender.hasPermission("legendchat.admin")) {
-				sender.sendMessage(Legendchat.getMessageManager().getMessage("error2"));
-				return;
-			}
+		} else if ((!sender.hasPermission("legendchat.channel." + c.getName().toLowerCase() + ".chat")
+				|| sender.hasPermission("legendchat.channel." + c.getName().toLowerCase() + ".blockwrite"))
+				&& !sender.hasPermission("legendchat.admin")) {
+			sender.sendMessage(Legendchat.getMessageManager().getMessage("error2"));
+			return;
 		}
 		if(c.isFocusNeeded()) {
-			if(Legendchat.getPlayerManager().getPlayerFocusedChannel(sender)!=c) {
+			if (Legendchat.getPlayerManager().getPlayerFocusedChannel(sender) != c) {
 				sender.sendMessage(Legendchat.getMessageManager().getMessage("error12"));
 				return;
 			}
 		}
 		int delay = Legendchat.getDelayManager().getPlayerDelayFromChannel(sender.getName(), c);
-		if(delay>0) {
+		if (delay > 0) {
 			sender.sendMessage(Legendchat.getMessageManager().getMessage("error11").replace("@time", Integer.toString(delay)));
 			return;
 		}
 		if(Legendchat.getMuteManager().isPlayerMuted(sender.getName())) {
 			int time = Legendchat.getMuteManager().getPlayerMuteTimeLeft(sender.getName());
-			if(time==0)
+			if (time == 0)
 				sender.sendMessage(Legendchat.getMessageManager().getMessage("mute_error4"));
 			else
 				sender.sendMessage(Legendchat.getMessageManager().getMessage("mute_error5").replace("@time", Integer.toString(time)));
@@ -131,15 +126,15 @@ public class ChannelUtils {
 		}
 		else {
 			for(Player p : Bukkit.getOnlinePlayers())
-				if(p.hasPermission("legendchat.channel."+c.getName().toLowerCase()+".chat")||p.hasPermission("legendchat.admin"))
+				if (p.hasPermission("legendchat.channel." + c.getName().toLowerCase() + ".chat") || p.hasPermission("legendchat.admin"))
 					recipients.add(p);
 		}
 		Set<Player> recipients2 = new HashSet<>();
 		recipients2.addAll(recipients);
 
 		for(Player p : recipients2) {
-			if(c.getMaxDistance()!=0) {
-				if(sender.getWorld()!=p.getWorld()) {
+			if(c.getMaxDistance() != 0) {
+				if(sender.getWorld() != p.getWorld()) {
 					recipients.remove(p);
 					continue;
 				}
@@ -150,7 +145,7 @@ public class ChannelUtils {
 			}
 			else {
 				if(!c.isCrossworlds())
-					if(sender.getWorld()!=p.getWorld()) {
+					if(sender.getWorld() != p.getWorld()) {
 						recipients.remove(p);
 						continue;
 					}
@@ -164,58 +159,60 @@ public class ChannelUtils {
 				continue;
 			}
 			if(c.isFocusNeeded())
-				if(Legendchat.getPlayerManager().getPlayerFocusedChannel(p)!=c)
+				if(Legendchat.getPlayerManager().getPlayerFocusedChannel(p) != c)
 					recipients.remove(p);
 		}
 		
+		// if player paid for message send
 		boolean gastou = false;
-		if(!Main.block_econ&&c.getMessageCost()>0) {
-			if(!sender.hasPermission("legendchat.channel."+c.getName().toLowerCase()+".free")&&!sender.hasPermission("legendchat.admin")) {
-				if(Main.econ.getBalance(sender.getName())<c.getMessageCost()) {
+		if (!Main.block_econ && c.getMessageCost() > 0) {
+			if (!sender.hasPermission("legendchat.channel." + c.getName().toLowerCase() + ".free") && !sender.hasPermission("legendchat.admin")) {
+				if (Main.econ.getBalance(sender) < c.getMessageCost()) {
 					sender.sendMessage(Legendchat.getMessageManager().getMessage("error3").replace("@price", Double.toString(c.getMessageCost())));
 					return;
 				}
-				Main.econ.withdrawPlayer(sender.getName(), c.getMessageCost());
-				gastou=true;
+				Main.econ.withdrawPlayer(sender, c.getMessageCost());
+				gastou = true;
 			}
 		}
 		String n_format_p_p = "";
 		String n_format_p = "";
 		String n_format_s = "";
-		if(bukkit_format.contains("<")&&bukkit_format.contains(">")) {
+		if (bukkit_format.contains("<") && bukkit_format.contains(">")) {
 			String name_code = null;
 			if(bukkit_format.contains("%1$s"))
-				name_code="%1$s";
+				name_code = "%1$s";
 			else if(bukkit_format.contains("%s"))
-				name_code="%s";
+				name_code = "%s";
 			int seploc = bukkit_format.indexOf(name_code);
 			int finalloc = -1;
-			for(int i=seploc;i>=0;--i)
-				if(bukkit_format.charAt(i)=='<') {
-					finalloc=i;
+			for (int i = seploc; i >= 0; --i) {
+				if (bukkit_format.charAt(i) == '<') {
+					finalloc = i;
 					break;
 				}
-			if(finalloc!=-1) {
+			}
+			if (finalloc != -1) {
 				n_format_p_p = bukkit_format.substring(0, finalloc);
-				if(name_code!=null) {
-					String[] n_format = bukkit_format.substring(finalloc+1).split(">")[0].split(name_code);
-					if(n_format.length>0)
+				if (name_code != null) {
+					String[] n_format = bukkit_format.substring(finalloc + 1).split(">")[0].split(name_code);
+					if(n_format.length > 0)
 						n_format_p = n_format[0].replace(name_code, "").replace("{factions_relcolor}", "");
-					if(n_format.length>1)
+					if(n_format.length > 1)
 						n_format_s = n_format[1];
 				}
 			}
 		}
-		HashMap<String,String> tags = new HashMap<>();
+		HashMap<String, String> tags = new HashMap<>();
 		tags.put("name", c.getName());
 		tags.put("nick", c.getNickname());
 		tags.put("color", c.getColor());
 		tags.put("sender", sender.getDisplayName());
 		tags.put("plainsender", sender.getName());
 		tags.put("world", sender.getWorld().getName());
-		tags.put("bprefix", (Legendchat.forceRemoveDoubleSpacesFromBukkit()?(n_format_p_p.equals(" ")?"":n_format_p_p.replace("  ", " ")):n_format_p_p));
-		tags.put("bprefix2", (Legendchat.forceRemoveDoubleSpacesFromBukkit()?(n_format_p.equals(" ")?"":n_format_p.replace("  ", " ")):n_format_p));
-		tags.put("bsuffix", (Legendchat.forceRemoveDoubleSpacesFromBukkit()?(n_format_s.equals(" ")?"":n_format_s.replace("  ", " ")):n_format_s));
+		tags.put("bprefix", (Legendchat.forceRemoveDoubleSpacesFromBukkit() ? (n_format_p_p.equals(" ") ? "" : n_format_p_p.replace("  ", " ")) : n_format_p_p));
+		tags.put("bprefix2", (Legendchat.forceRemoveDoubleSpacesFromBukkit() ? (n_format_p.equals(" ") ? "" : n_format_p.replace("  ", " ")) : n_format_p));
+		tags.put("bsuffix", (Legendchat.forceRemoveDoubleSpacesFromBukkit() ? (n_format_s.equals(" ") ? "" : n_format_s.replace("  ", " ")) : n_format_s));
 		tags.put("server", Legendchat.getMessageManager().getMessage("bungeecord_server"));
 		tags.put("time_hour", Integer.toString(Calendar.getInstance().get(Calendar.HOUR_OF_DAY)));
 		tags.put("time_min", Integer.toString(Calendar.getInstance().get(Calendar.MINUTE)));
@@ -223,63 +220,61 @@ public class ChannelUtils {
 		tags.put("date_day", Integer.toString(Calendar.getInstance().get(Calendar.DAY_OF_MONTH)));
 		tags.put("date_month", Integer.toString(Calendar.getInstance().get(Calendar.MONTH)));
 		tags.put("date_year", Integer.toString(Calendar.getInstance().get(Calendar.YEAR)));
-		if(!Main.block_chat) {
+		if (!Main.block_chat) {
 			tags.put("prefix", tag(Main.chat.getPlayerPrefix(sender)));
 			tags.put("suffix", tag(Main.chat.getPlayerSuffix(sender)));
 			tags.put("groupprefix", tag(Main.chat.getGroupPrefix(sender.getWorld(), Main.chat.getPrimaryGroup(sender))));
 			tags.put("groupsuffix", tag(Main.chat.getGroupSuffix(sender.getWorld(), Main.chat.getPrimaryGroup(sender))));
-			for(String g : Main.chat.getPlayerGroups(sender)) {
-				tags.put(g.toLowerCase()+"prefix", tag(Main.chat.getGroupPrefix(sender.getWorld(), g)));
-				tags.put(g.toLowerCase()+"suffix", tag(Main.chat.getGroupSuffix(sender.getWorld(), g)));
+			for (String g : Main.chat.getPlayerGroups(sender)) {
+				tags.put(g.toLowerCase() + "prefix", tag(Main.chat.getGroupPrefix(sender.getWorld(), g)));
+				tags.put(g.toLowerCase() + "suffix", tag(Main.chat.getGroupSuffix(sender.getWorld(), g)));
 			}
 		}
-		HashMap<String,String> ttt = Legendchat.textToTag();
-		if(ttt.size()>0) {
-			HashSet<Player> p = new HashSet<>();
-			p.add(sender);
-			int i=1;
-			for(String n : ttt.keySet()) {
+		HashMap<String, String> ttt = Legendchat.textToTag();
+		if (!ttt.isEmpty()) {
+			int i = 1;
+			for (String n : ttt.keySet()) {
 				String tag;
-				try {tag=bukkit_format.split("°"+i+"º°")[1].split("°"+(i+1)+"º°")[0];}
-				catch(Exception e) {tag="";}
+				try { tag = bukkit_format.split("°" + i + "º°")[1].split("°" + (i + 1) + "º°")[0]; }
+				catch (Exception e) { tag = ""; }
 				tags.put(n, tag);
 				++i;
 			}
 		}
-		ChatMessageEvent e = new ChatMessageEvent(c,sender,channel_format.startsWith("%me_me%") ? "* " + message + " *" : message,Legendchat.format(channel_format),channel_format,bukkit_format,recipients,tags,cancelled);
+		ChatMessageEvent e = new ChatMessageEvent(c, sender, message, Legendchat.format(channel_format), channel_format, bukkit_format, recipients, tags, cancelled);
 		Bukkit.getPluginManager().callEvent(e);
 		if(e.isCancelled())
 			return;
 		sender = e.getSender();
 		message = e.getMessage();
-		if(channel_format.startsWith("%me_me%")) {
+		String completa = e.getFormat();
+		if(completa.startsWith("%me%")) {
 			message = message.replaceAll("^\\* | \\*$", "");
-			e.setFormat(channel_format.substring("%me_me%".length()));
+			completa = completa.substring("%me%".length());
 		}
 		if(Legendchat.isCensorActive())
 			message = Legendchat.getCensorManager().censorFunction(message);
-		String completa = e.getFormat();
 		if(Legendchat.blockRepeatedTags()) {
-			if(e.getTags().contains("prefix")&&e.getTags().contains("groupprefix"))
+			if (e.getTags().contains("prefix") && e.getTags().contains("groupprefix"))
 				if(e.getTagValue("prefix").equals(e.getTagValue("groupprefix")))
 					e.setTagValue("prefix", "");
-			if(e.getTags().contains("suffix")&&e.getTags().contains("groupsuffix"))
+			if (e.getTags().contains("suffix") && e.getTags().contains("groupsuffix"))
 				if(e.getTagValue("suffix").equals(e.getTagValue("groupsuffix")))
 					e.setTagValue("suffix", "");
 		}
-		for(String n : e.getTags())
-			completa = completa.replace("{"+n+"}", ChatColor.translateAlternateColorCodes('&', e.getTagValue(n)));
+		for (String n : e.getTags())
+			completa = completa.replace("{" + n + "}", ChatColor.translateAlternateColorCodes('&', e.getTagValue(n)));
 		completa = completa.replace("{msg}", translateAlternateChatColorsWithPermission(sender, message));
-		
+
 		for(Player p : e.getRecipients())
 			p.sendMessage(completa);
 		
-		if(c.getDelayPerMessage()>0&&!sender.hasPermission("legendchat.channel."+c.getName().toLowerCase()+".nodelay")&&!sender.hasPermission("legendchat.admin"))
+		if (c.getDelayPerMessage() > 0 && !sender.hasPermission("legendchat.channel." + c.getName().toLowerCase() + ".nodelay") && !sender.hasPermission("legendchat.admin"))
 			Legendchat.getDelayManager().addPlayerDelay(sender.getName(), c);
 		
-		if(c.getMaxDistance()!=0)
+		if (c.getMaxDistance() != 0)
 			if(Legendchat.showNoOneHearsYou()) {
-				boolean show = false;
+				boolean show;
 				if(e.getRecipients().isEmpty())
 					show=true;
 				else if(e.getRecipients().size()==1&&e.getRecipients().contains(sender))
@@ -336,7 +331,7 @@ public class ChannelUtils {
 		}
 		else {
 			for(Player p : Bukkit.getOnlinePlayers())
-				if(p.hasPermission("legendchat.channel."+c.getName().toLowerCase()+".chat")||p.hasPermission("legendchat.admin"))
+				if (p.hasPermission("legendchat.channel." + c.getName().toLowerCase() + ".chat") || p.hasPermission("legendchat.admin"))
 					recipients.add(p);
 		}
 		Set<Player> recipients2 = new HashSet<>();
@@ -348,7 +343,7 @@ public class ChannelUtils {
 				continue;
 			}
 			if(c.isFocusNeeded())
-				if(Legendchat.getPlayerManager().getPlayerFocusedChannel(p)!=c)
+				if (Legendchat.getPlayerManager().getPlayerFocusedChannel(p) != c)
 					recipients.remove(p);
 		}
 		
@@ -372,7 +367,7 @@ public class ChannelUtils {
 	}
 	
 	public static String translateStringColor(String color) {
-		switch(color.toLowerCase()) {
+		switch(color.toLowerCase().replace("_", "")) {
 			case "black": {return ChatColor.BLACK.toString();}
 			case "darkblue": {return ChatColor.DARK_BLUE.toString();}
 			case "darkgreen": {return ChatColor.DARK_GREEN.toString();}
@@ -393,7 +388,7 @@ public class ChannelUtils {
 	}
 	
 	public static ChatColor translateStringColorToChatColor(String color) {
-		switch(color.toLowerCase()) {
+		switch(color.toLowerCase().replace("_", "")) {
 			case "black": {return ChatColor.BLACK;}
 			case "darkblue": {return ChatColor.DARK_BLUE;}
 			case "darkgreen": {return ChatColor.DARK_GREEN;}
@@ -435,46 +430,47 @@ public class ChannelUtils {
 	}
 	
 	private static String tag(String tag) {
-		if(tag==null)
+		if (tag == null)
 			return "";
 		return tag;
 	}
 	
 	public static String translateAlternateChatColorsWithPermission(Player p, String msg) {
-		if(msg.contains("&0")&&(p.hasPermission("legendchat.color.black")||p.hasPermission("legendchat.color.allcolors")||p.hasPermission("legendchat.admin"))) {msg=msg.replace("&0", ChatColor.BLACK.toString());}
-		if(msg.contains("&1")&&(p.hasPermission("legendchat.color.darkblue")||p.hasPermission("legendchat.color.allcolors")||p.hasPermission("legendchat.admin"))) {msg=msg.replace("&1", ChatColor.DARK_BLUE.toString());}
-		if(msg.contains("&2")&&(p.hasPermission("legendchat.color.darkgreen")||p.hasPermission("legendchat.color.allcolors")||p.hasPermission("legendchat.admin"))) {msg=msg.replace("&2", ChatColor.DARK_GREEN.toString());}
-		if(msg.contains("&3")&&(p.hasPermission("legendchat.color.darkaqua")||p.hasPermission("legendchat.color.allcolors")||p.hasPermission("legendchat.admin"))) {msg=msg.replace("&3", ChatColor.DARK_AQUA.toString());}
-		if(msg.contains("&4")&&(p.hasPermission("legendchat.color.darkred")||p.hasPermission("legendchat.color.allcolors")||p.hasPermission("legendchat.admin"))) {msg=msg.replace("&4", ChatColor.DARK_RED.toString());}
-		if(msg.contains("&5")&&(p.hasPermission("legendchat.color.darkpurple")||p.hasPermission("legendchat.color.allcolors")||p.hasPermission("legendchat.admin"))) {msg=msg.replace("&5", ChatColor.DARK_PURPLE.toString());}
-		if(msg.contains("&6")&&(p.hasPermission("legendchat.color.gold")||p.hasPermission("legendchat.color.allcolors")||p.hasPermission("legendchat.admin"))) {msg=msg.replace("&6", ChatColor.GOLD.toString());}
-		if(msg.contains("&7")&&(p.hasPermission("legendchat.color.gray")||p.hasPermission("legendchat.color.allcolors")||p.hasPermission("legendchat.admin"))) {msg=msg.replace("&7", ChatColor.GRAY.toString());}
-		if(msg.contains("&8")&&(p.hasPermission("legendchat.color.darkgray")||p.hasPermission("legendchat.color.allcolors")||p.hasPermission("legendchat.admin"))) {msg=msg.replace("&8", ChatColor.DARK_GRAY.toString());}
-		if(msg.contains("&9")&&(p.hasPermission("legendchat.color.blue")||p.hasPermission("legendchat.color.allcolors")||p.hasPermission("legendchat.admin"))) {msg=msg.replace("&9", ChatColor.BLUE.toString());}
-		if(msg.contains("&a")&&(p.hasPermission("legendchat.color.green")||p.hasPermission("legendchat.color.allcolors")||p.hasPermission("legendchat.admin"))) {msg=msg.replace("&a", ChatColor.GREEN.toString());}
-		if(msg.contains("&b")&&(p.hasPermission("legendchat.color.aqua")||p.hasPermission("legendchat.color.allcolors")||p.hasPermission("legendchat.admin"))) {msg=msg.replace("&b", ChatColor.AQUA.toString());}
-		if(msg.contains("&c")&&(p.hasPermission("legendchat.color.red")||p.hasPermission("legendchat.color.allcolors")||p.hasPermission("legendchat.admin"))) {msg=msg.replace("&c", ChatColor.RED.toString());}
-		if(msg.contains("&d")&&(p.hasPermission("legendchat.color.lightpurple")||p.hasPermission("legendchat.color.allcolors")||p.hasPermission("legendchat.admin"))) {msg=msg.replace("&d", ChatColor.LIGHT_PURPLE.toString());}
-		if(msg.contains("&e")&&(p.hasPermission("legendchat.color.yellow")||p.hasPermission("legendchat.color.allcolors")||p.hasPermission("legendchat.admin"))) {msg=msg.replace("&e", ChatColor.YELLOW.toString());}
-		if(msg.contains("&f")&&(p.hasPermission("legendchat.color.white")||p.hasPermission("legendchat.color.allcolors")||p.hasPermission("legendchat.admin"))) {msg=msg.replace("&f", ChatColor.WHITE.toString());}
-		if(msg.contains("&k")&&(p.hasPermission("legendchat.color.obfuscated")||p.hasPermission("legendchat.color.obfuscate")||p.hasPermission("legendchat.color.allformats")||p.hasPermission("legendchat.admin"))) {msg=msg.replace("&k", ChatColor.MAGIC.toString());}
-		if(msg.contains("&l")&&(p.hasPermission("legendchat.color.bold")||p.hasPermission("legendchat.color.allformats")||p.hasPermission("legendchat.admin"))) {msg=msg.replace("&l", ChatColor.BOLD.toString());}
-		if(msg.contains("&m")&&(p.hasPermission("legendchat.color.strikethrough")||p.hasPermission("legendchat.color.allformats")||p.hasPermission("legendchat.admin"))) {msg=msg.replace("&m", ChatColor.STRIKETHROUGH.toString());}
-		if(msg.contains("&n")&&(p.hasPermission("legendchat.color.underline")||p.hasPermission("legendchat.color.allformats")||p.hasPermission("legendchat.admin"))) {msg=msg.replace("&0n", ChatColor.UNDERLINE.toString());}
-		if(msg.contains("&o")&&(p.hasPermission("legendchat.color.italic")||p.hasPermission("legendchat.color.allformats")||p.hasPermission("legendchat.admin"))) {msg=msg.replace("&o", ChatColor.ITALIC.toString());}
-		if(msg.contains("&r")&&(p.hasPermission("legendchat.color.reset")||p.hasPermission("legendchat.color.allformats")||p.hasPermission("legendchat.admin"))) {msg=msg.replace("&r", ChatColor.RESET.toString());}
-		if(msg.contains("&A")&&(p.hasPermission("legendchat.color.green")||p.hasPermission("legendchat.color.allcolors")||p.hasPermission("legendchat.admin"))) {msg=msg.replace("&A", ChatColor.GREEN.toString());}
-		if(msg.contains("&B")&&(p.hasPermission("legendchat.color.aqua")||p.hasPermission("legendchat.color.allcolors")||p.hasPermission("legendchat.admin"))) {msg=msg.replace("&B", ChatColor.AQUA.toString());}
-		if(msg.contains("&C")&&(p.hasPermission("legendchat.color.red")||p.hasPermission("legendchat.color.allcolors")||p.hasPermission("legendchat.admin"))) {msg=msg.replace("&C", ChatColor.RED.toString());}
-		if(msg.contains("&D")&&(p.hasPermission("legendchat.color.lightpurple")||p.hasPermission("legendchat.color.allcolors")||p.hasPermission("legendchat.admin"))) {msg=msg.replace("&D", ChatColor.LIGHT_PURPLE.toString());}
-		if(msg.contains("&E")&&(p.hasPermission("legendchat.color.yellow")||p.hasPermission("legendchat.color.allcolors")||p.hasPermission("legendchat.admin"))) {msg=msg.replace("&E", ChatColor.YELLOW.toString());}
-		if(msg.contains("&F")&&(p.hasPermission("legendchat.color.white")||p.hasPermission("legendchat.color.allcolors")||p.hasPermission("legendchat.admin"))) {msg=msg.replace("&F", ChatColor.WHITE.toString());}
-		if(msg.contains("&K")&&(p.hasPermission("legendchat.color.obfuscated")||p.hasPermission("legendchat.color.obfuscate")||p.hasPermission("legendchat.color.allformats")||p.hasPermission("legendchat.admin"))) {msg=msg.replace("&K", ChatColor.MAGIC.toString());}
-		if(msg.contains("&L")&&(p.hasPermission("legendchat.color.bold")||p.hasPermission("legendchat.color.allformats")||p.hasPermission("legendchat.admin"))) {msg=msg.replace("&L", ChatColor.BOLD.toString());}
-		if(msg.contains("&M")&&(p.hasPermission("legendchat.color.strikethrough")||p.hasPermission("legendchat.color.allformats")||p.hasPermission("legendchat.admin"))) {msg=msg.replace("&M", ChatColor.STRIKETHROUGH.toString());}
-		if(msg.contains("&N")&&(p.hasPermission("legendchat.color.underline")||p.hasPermission("legendchat.color.allformats")||p.hasPermission("legendchat.admin"))) {msg=msg.replace("&N", ChatColor.UNDERLINE.toString());}
-		if(msg.contains("&O")&&(p.hasPermission("legendchat.color.italic")||p.hasPermission("legendchat.color.allformats")||p.hasPermission("legendchat.admin"))) {msg=msg.replace("&O", ChatColor.ITALIC.toString());}
-		if(msg.contains("&R")&&(p.hasPermission("legendchat.color.reset")||p.hasPermission("legendchat.color.allformats")||p.hasPermission("legendchat.admin"))) {msg=msg.replace("&R", ChatColor.RESET.toString());}
+		final boolean admin = p.hasPermission("legendchat.color.allcolors") || p.hasPermission("legendchat.admin");
+		if(msg.contains("&0")&&(admin || p.hasPermission("legendchat.color.black"))) {msg = msg.replace("&0", ChatColor.BLACK.toString());}
+		if(msg.contains("&1")&&(admin || p.hasPermission("legendchat.color.darkblue"))) {msg = msg.replace("&1", ChatColor.DARK_BLUE.toString());}
+		if(msg.contains("&2")&&(admin || p.hasPermission("legendchat.color.darkgreen"))) {msg = msg.replace("&2", ChatColor.DARK_GREEN.toString());}
+		if(msg.contains("&3")&&(admin || p.hasPermission("legendchat.color.darkaqua"))) {msg = msg.replace("&3", ChatColor.DARK_AQUA.toString());}
+		if(msg.contains("&4")&&(admin || p.hasPermission("legendchat.color.darkred"))) {msg = msg.replace("&4", ChatColor.DARK_RED.toString());}
+		if(msg.contains("&5")&&(admin || p.hasPermission("legendchat.color.darkpurple"))) {msg = msg.replace("&5", ChatColor.DARK_PURPLE.toString());}
+		if(msg.contains("&6")&&(admin || p.hasPermission("legendchat.color.gold"))) {msg = msg.replace("&6", ChatColor.GOLD.toString());}
+		if(msg.contains("&7")&&(admin || p.hasPermission("legendchat.color.gray"))) {msg = msg.replace("&7", ChatColor.GRAY.toString());}
+		if(msg.contains("&8")&&(admin || p.hasPermission("legendchat.color.darkgray"))) {msg = msg.replace("&8", ChatColor.DARK_GRAY.toString());}
+		if(msg.contains("&9")&&(admin || p.hasPermission("legendchat.color.blue"))) {msg = msg.replace("&9", ChatColor.BLUE.toString());}
+		if(msg.contains("&a")&&(admin || p.hasPermission("legendchat.color.green"))) {msg = msg.replace("&a", ChatColor.GREEN.toString());}
+		if(msg.contains("&b")&&(admin || p.hasPermission("legendchat.color.aqua"))) {msg = msg.replace("&b", ChatColor.AQUA.toString());}
+		if(msg.contains("&c")&&(admin || p.hasPermission("legendchat.color.red"))) {msg = msg.replace("&c", ChatColor.RED.toString());}
+		if(msg.contains("&d")&&(admin || p.hasPermission("legendchat.color.lightpurple"))) {msg = msg.replace("&d", ChatColor.LIGHT_PURPLE.toString());}
+		if(msg.contains("&e")&&(admin || p.hasPermission("legendchat.color.yellow"))) {msg = msg.replace("&e", ChatColor.YELLOW.toString());}
+		if(msg.contains("&f")&&(admin || p.hasPermission("legendchat.color.white"))) {msg = msg.replace("&f", ChatColor.WHITE.toString());}
+		if(msg.contains("&k")&&(admin || p.hasPermission("legendchat.color.obfuscated") || p.hasPermission("legendchat.color.obfuscate"))) {msg = msg.replace("&k", ChatColor.MAGIC.toString());}
+		if(msg.contains("&l")&&(admin || p.hasPermission("legendchat.color.bold"))) {msg = msg.replace("&l", ChatColor.BOLD.toString());}
+		if(msg.contains("&m")&&(admin || p.hasPermission("legendchat.color.strikethrough"))) {msg = msg.replace("&m", ChatColor.STRIKETHROUGH.toString());}
+		if(msg.contains("&n")&&(admin || p.hasPermission("legendchat.color.underline"))) {msg = msg.replace("&0n", ChatColor.UNDERLINE.toString());}
+		if(msg.contains("&o")&&(admin || p.hasPermission("legendchat.color.italic"))) {msg = msg.replace("&o", ChatColor.ITALIC.toString());}
+		if(msg.contains("&r")&&(admin || p.hasPermission("legendchat.color.reset"))) {msg = msg.replace("&r", ChatColor.RESET.toString());}
+		if(msg.contains("&A")&&(admin || p.hasPermission("legendchat.color.green"))) {msg = msg.replace("&A", ChatColor.GREEN.toString());}
+		if(msg.contains("&B")&&(admin || p.hasPermission("legendchat.color.aqua"))) {msg = msg.replace("&B", ChatColor.AQUA.toString());}
+		if(msg.contains("&C")&&(admin || p.hasPermission("legendchat.color.red"))) {msg = msg.replace("&C", ChatColor.RED.toString());}
+		if(msg.contains("&D")&&(admin || p.hasPermission("legendchat.color.lightpurple"))) {msg = msg.replace("&D", ChatColor.LIGHT_PURPLE.toString());}
+		if(msg.contains("&E")&&(admin || p.hasPermission("legendchat.color.yellow"))) {msg = msg.replace("&E", ChatColor.YELLOW.toString());}
+		if(msg.contains("&F")&&(admin || p.hasPermission("legendchat.color.white"))) {msg = msg.replace("&F", ChatColor.WHITE.toString());}
+		if(msg.contains("&K")&&(admin || p.hasPermission("legendchat.color.obfuscated") || p.hasPermission("legendchat.color.obfuscate"))) {msg = msg.replace("&K", ChatColor.MAGIC.toString());}
+		if(msg.contains("&L")&&(admin || p.hasPermission("legendchat.color.bold"))) {msg = msg.replace("&L", ChatColor.BOLD.toString());}
+		if(msg.contains("&M")&&(admin || p.hasPermission("legendchat.color.strikethrough"))) {msg = msg.replace("&M", ChatColor.STRIKETHROUGH.toString());}
+		if(msg.contains("&N")&&(admin || p.hasPermission("legendchat.color.underline"))) {msg = msg.replace("&N", ChatColor.UNDERLINE.toString());}
+		if(msg.contains("&O")&&(admin || p.hasPermission("legendchat.color.italic"))) {msg = msg.replace("&O", ChatColor.ITALIC.toString());}
+		if(msg.contains("&R")&&(admin || p.hasPermission("legendchat.color.reset"))) {msg = msg.replace("&R", ChatColor.RESET.toString());}
 		return msg;
 	}
 }

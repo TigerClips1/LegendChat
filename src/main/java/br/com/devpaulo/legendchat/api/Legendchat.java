@@ -166,7 +166,7 @@ public class Legendchat {
 	
 	public static String format(String msg) {
 		for(String f : formats.keySet())
-			msg = msg.replace("{"+f+"}", formats.get(f));
+			msg = msg.replace("{" + f + "}", formats.get(f));
 		return msg;
 	}
 	
