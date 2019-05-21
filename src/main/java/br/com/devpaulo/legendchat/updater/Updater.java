@@ -17,6 +17,9 @@ import org.json.simple.JSONValue;
 
 import br.com.devpaulo.legendchat.api.Legendchat;
 import br.com.devpaulo.legendchat.messages.MessageManager;
+import java.lang.reflect.Method;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 public class Updater {
 	private String version = "";
@@ -83,11 +86,15 @@ public class Updater {
 		try {
 			InputStreamReader is = new InputStreamReader(plugin.getResource(("config_template.yml").replace('\\', '/')));
 			c = YamlConfiguration.loadConfiguration(is);
-		}
-		catch(NoSuchMethodError nsme)
-		{
-			InputStream is = plugin.getResource(("config_template.yml").replace('\\', '/'));
-			c = YamlConfiguration.loadConfiguration(is);
+		} catch(NoSuchMethodError nsme) {
+            try {
+                Method loadConfigurationMethod = YamlConfiguration.class.getMethod("loadConfiguration", InputStream.class);
+                InputStream is = plugin.getResource(("config_template.yml").replace('\\', '/'));
+                c = (YamlConfiguration) loadConfigurationMethod.invoke(null, is);
+            } catch (Exception ex) {
+                Logger.getLogger(Updater.class.getName()).log(Level.SEVERE, "Updater Error", ex);
+                return false;
+            }
 		}
 		for(String n : c.getConfigurationSection("").getKeys(true))
 			if(!has(n))
@@ -114,17 +121,21 @@ public class Updater {
 		m.loadMessages(f);
 		YamlConfiguration c;
 		try {
-			InputStreamReader is = null;
+			InputStreamReader is;
 			if ((is = new InputStreamReader(plugin.getResource(("language" + File.separator + "language_" + language + ".yml").replace('\\', '/')))) == null)
 				is = new InputStreamReader(plugin.getResource(("language" + File.separator + "language_en.yml").replace('\\', '/')));
 			 c = YamlConfiguration.loadConfiguration(is);
-		} catch (NoSuchMethodError nsme)
-		{
-			InputStream is = null;
-			if ((is = plugin.getResource(("language" + File.separator + "language_" + language + ".yml").replace('\\', '/'))) == null)
-				is = plugin.getResource(("language" + File.separator + "language_en.yml").replace('\\', '/'));
-			c = YamlConfiguration.loadConfiguration(is);
-
+		} catch (NoSuchMethodError nsme) {
+            try {
+                Method loadConfigurationMethod = YamlConfiguration.class.getMethod("loadConfiguration", InputStream.class);
+                InputStream is;
+                if ((is = plugin.getResource(("language" + File.separator + "language_" + language + ".yml").replace('\\', '/'))) == null)
+                    is = plugin.getResource(("language" + File.separator + "language_en.yml").replace('\\', '/'));
+                c = (YamlConfiguration) loadConfigurationMethod.invoke(null, is);
+            } catch (Exception ex) {
+                Logger.getLogger(Updater.class.getName()).log(Level.SEVERE, "Updater Error", ex);
+                return false;
+            }
 		}
 		for(String n : c.getConfigurationSection("").getKeys(false))
 			if(!m.hasMessage(n))
