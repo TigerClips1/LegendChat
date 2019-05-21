@@ -12,7 +12,9 @@ import br.com.devpaulo.legendchat.updater.Updater;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import org.apache.commons.lang.WordUtils;
 import org.bukkit.Bukkit;
 import org.bukkit.command.Command;
@@ -55,6 +57,12 @@ public class AdminCommand implements CommandExecutor, TabCompleter {
 					sender.sendMessage(Legendchat.getMessageManager().getMessage("error6"));
 					return true;
 				}
+				HashMap<Player, String> focusedChannels = new HashMap();
+				for(Player p : Bukkit.getOnlinePlayers()) {
+					Channel c = Legendchat.getPlayerManager().getPlayerFocusedChannel(p);
+					if(c != null)
+						focusedChannels.put(p, c.getName());
+				}
 				Legendchat.load(false);
 				Plugin lc = Bukkit.getPluginManager().getPlugin("Legendchat");
 				lc.reloadConfig();
@@ -83,6 +91,11 @@ public class AdminCommand implements CommandExecutor, TabCompleter {
 					lc.getServer().getPluginManager().registerEvents(new Listeners_old(), lc);
 				}
 				Legendchat.load(true);
+				for(Map.Entry<Player, String> e : focusedChannels.entrySet()) {
+					Channel c = Legendchat.getChannelManager().getChannelByName(e.getValue());
+					if(c != null)
+						Legendchat.getPlayerManager().setPlayerFocusedChannel(e.getKey(), c, false);
+				}
 				sender.sendMessage(Legendchat.getMessageManager().getMessage("message2"));
 				return true;
 			} else if (args[0].equalsIgnoreCase("channel")) {
@@ -308,7 +321,7 @@ public class AdminCommand implements CommandExecutor, TabCompleter {
 	 */
 	@Override
 	public List<String> onTabComplete(CommandSender sender, Command command, String alias, String[] args) {
-		if (args.length == 0) {
+		if (args.length == 1) {
 			boolean admin = sender.hasPermission("legendchat.admin");
 			ArrayList<String> cmds = new ArrayList();
 			for(String cmd : Arrays.asList("reload", "channel", "playerch", "spy", "hide", "mute", "unmute", "muteall")) {
