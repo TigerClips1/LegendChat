@@ -25,35 +25,63 @@ import br.com.devpaulo.legendchat.listeners.Listeners_old;
 
 @SuppressWarnings("deprecation")
 public class ChannelUtils {
+	public static void fakeMe(final Channel c, final Player sender, final String message) {
+		if(!Legendchat.sendFakeMessageToChat()) {
+			c.sendMe(sender, message, "", false);
+			return;
+		}
+		if(!Legendchat.useAsyncChat()) {
+			PlayerChatEvent event = new PlayerChatEvent(sender, "* " + message + " *");
+			Listeners_old.addFakeChat(event, false);
+			Bukkit.getPluginManager().callEvent(event);
+			c.sendMe(sender, event.getMessage().replaceAll("^\\* | \\*$", ""), event.getFormat(), Listeners_old.getFakeChat(event));
+			Listeners_old.removeFakeChat(event);
+		} else {
+			HashSet<Player> p = new HashSet<>();
+			p.add(sender);
+			final AsyncPlayerChatEvent event = new AsyncPlayerChatEvent(true, sender, "* " + message + " *", p);
+			Listeners.addFakeChat(event, false);
+			Bukkit.getScheduler().runTaskAsynchronously(Legendchat.getPlugin(), () -> {
+				Bukkit.getPluginManager().callEvent(event);
+				c.sendMe(sender, event.getMessage().replaceAll("^\\* | \\*$", ""), event.getFormat(), Listeners.getFakeChat(event));
+				Listeners.removeFakeChat(event);
+			});
+		}
+	}
+	
 	public static void fakeMessage(final Channel c, final Player sender, final String message) {
 		if(!Legendchat.sendFakeMessageToChat()) {
 			c.sendMessage(sender, message, "", false);
 			return;
 		}
 		if(!Legendchat.useAsyncChat()) {
-			PlayerChatEvent event = new PlayerChatEvent(sender, "legendchat");
+			PlayerChatEvent event = new PlayerChatEvent(sender, message);
 			Listeners_old.addFakeChat(event, false);
 			Bukkit.getPluginManager().callEvent(event);
 			c.sendMessage(sender, message, event.getFormat(), Listeners_old.getFakeChat(event));
 			Listeners_old.removeFakeChat(event);
-		}
-		else {
+		} else {
 			HashSet<Player> p = new HashSet<>();
 			p.add(sender);
-			final AsyncPlayerChatEvent event = new AsyncPlayerChatEvent(true, sender, "legendchat", p);
+			final AsyncPlayerChatEvent event = new AsyncPlayerChatEvent(true, sender, message, p);
 			Listeners.addFakeChat(event, false);
-			Bukkit.getScheduler().runTaskAsynchronously(Legendchat.getPlugin(), new Runnable() {
-                                @Override
-				public void run() {
-					Bukkit.getPluginManager().callEvent(event);
-					c.sendMessage(sender, message, event.getFormat(), Listeners.getFakeChat(event));
-					Listeners.removeFakeChat(event);
-				}
+			Bukkit.getScheduler().runTaskAsynchronously(Legendchat.getPlugin(), () -> {
+				Bukkit.getPluginManager().callEvent(event);
+				c.sendMessage(sender, message, event.getFormat(), Listeners.getFakeChat(event));
+				Listeners.removeFakeChat(event);
 			});
 		}
 	}
 	
+	public static void realMe(Channel c, Player sender, String message, String bukkit_format, boolean cancelled) {
+		realMessage(c, sender, message, "%me_me%" + c.getMeFormat(), bukkit_format, cancelled);
+    }
+	
 	public static void realMessage(Channel c, Player sender, String message, String bukkit_format, boolean cancelled) {
+		realMessage(c, sender, message, c.getFormat(), bukkit_format, cancelled);
+	}
+	
+	public static void realMessage(Channel c, Player sender, String message, String channel_format, String bukkit_format, boolean cancelled) {
 		if(c instanceof TemporaryChannel) {
 			if(!((TemporaryChannel)c).user_list().contains(sender)) {
 				sender.sendMessage(Legendchat.getMessageManager().getMessage("tc_error8"));
@@ -211,19 +239,23 @@ public class ChannelUtils {
 			p.add(sender);
 			int i=1;
 			for(String n : ttt.keySet()) {
-				String tag = "";
+				String tag;
 				try {tag=bukkit_format.split("°"+i+"º°")[1].split("°"+(i+1)+"º°")[0];}
 				catch(Exception e) {tag="";}
 				tags.put(n, tag);
-				i++;
+				++i;
 			}
 		}
-		ChatMessageEvent e = new ChatMessageEvent(c,sender,message,Legendchat.format(c.getFormat()),c.getFormat(),bukkit_format,recipients,tags,cancelled);
+		ChatMessageEvent e = new ChatMessageEvent(c,sender,channel_format.startsWith("%me_me%") ? "* " + message + " *" : message,Legendchat.format(channel_format),channel_format,bukkit_format,recipients,tags,cancelled);
 		Bukkit.getPluginManager().callEvent(e);
 		if(e.isCancelled())
 			return;
 		sender = e.getSender();
 		message = e.getMessage();
+		if(channel_format.startsWith("%me_me%")) {
+			message = message.replaceAll("^\\* | \\*$", "");
+			e.setFormat(channel_format.substring("%me_me%".length()));
+		}
 		if(Legendchat.isCensorActive())
 			message = Legendchat.getCensorManager().censorFunction(message);
 		String completa = e.getFormat();

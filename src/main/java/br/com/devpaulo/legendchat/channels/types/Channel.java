@@ -13,6 +13,8 @@ public interface Channel {
 	
 	public String getFormat();
 	
+	public String getMeFormat();
+	
 	public String getColor();
 	
 	public String getStringColor();
@@ -42,9 +44,14 @@ public interface Channel {
 	
 	public void sendMessage(Player sender, String message, String bukkit_format, boolean cancelled);
 	
+	public void sendMe(Player sender, String message);
+	
+	public void sendMe(Player sender, String message, String bukkit_format, boolean cancelled);
+    
 	public void setNickname(String nickname);
 	
 	public void setFormat(String format);
+	public void setMeFormat(String format);
 	
 	public void setColor(ChatColor color);
 	

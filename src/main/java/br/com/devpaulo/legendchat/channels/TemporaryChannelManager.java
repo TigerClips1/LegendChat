@@ -18,7 +18,7 @@ public class TemporaryChannelManager {
 		if(!canCreateTempChannel(channel_name,channel_nickname))
 			return;
 		TemporaryChannelConfig c = Legendchat.getConfigManager().getTemporaryChannelConfig();
-		createTempChannel(new TemporaryChannel(channel_name,channel_nickname,c.getFormat(),c.getStringColor(),c.isShortcutAllowed(),c.isFocusNeeded(),c.getMaxDistance(),c.isCrossworlds(),c.getDelayPerMessage(),c.getCostPerMessage(),c.showCostMessage(),leader,c.moderatorsCanKick(),c.moderatorsCanInvite()));
+		createTempChannel(new TemporaryChannel(channel_name,channel_nickname,c.getFormat(),c.getMeFormat(),c.getStringColor(),c.isShortcutAllowed(),c.isFocusNeeded(),c.getMaxDistance(),c.isCrossworlds(),c.getDelayPerMessage(),c.getCostPerMessage(),c.showCostMessage(),leader,c.moderatorsCanKick(),c.moderatorsCanInvite()));
 	}
 	
 	public void createTempChannel(TemporaryChannel c) {

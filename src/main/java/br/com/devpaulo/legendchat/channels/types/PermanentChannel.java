@@ -12,6 +12,7 @@ public class PermanentChannel implements Channel {
 	private String name = "";
 	private String nick = "";
 	private String format = "";
+	private String formatMe = "";
 	private String color = "";
 	private String color2 = "";
 	private boolean shortcut = false;
@@ -21,163 +22,186 @@ public class PermanentChannel implements Channel {
 	private double cost = 0;
 	private boolean show_cost_msg = false;
 	private int delay = 0;
-	public PermanentChannel(String name, String nick, String format, String color, boolean shortcut, boolean focus, double distance, boolean crossworlds, int delay, double cost,boolean show_cost_msg) {
-		this.name=name;
-		this.nick=nick;
-		this.format=format;
-		this.color=ChannelUtils.translateStringColor(color);
-		color2=color.toLowerCase();
-		this.shortcut=shortcut;
-		this.focus=focus;
-		this.distance=distance;
-		this.crossworlds=crossworlds;
-		this.cost=cost;
-		this.show_cost_msg=show_cost_msg;
-		this.delay=delay;
+
+	public PermanentChannel(String name, String nick, String format, String meFormat, String color, boolean shortcut, boolean focus, double distance, boolean crossworlds, int delay, double cost, boolean show_cost_msg) {
+		this.name = name;
+		this.nick = nick;
+		this.format = format;
+		formatMe = meFormat;
+		this.color = ChannelUtils.translateStringColor(color);
+		color2 = color.toLowerCase();
+		this.shortcut = shortcut;
+		this.focus = focus;
+		this.distance = distance;
+		this.crossworlds = crossworlds;
+		this.cost = cost;
+		this.show_cost_msg = show_cost_msg;
+		this.delay = delay;
 	}
-	
-        @Override
+
+	@Override
 	public String getName() {
 		return name;
 	}
-	
-        @Override
+
+	@Override
 	public String getNickname() {
 		return nick;
 	}
-	
-        @Override
+
+	@Override
 	public String getFormat() {
 		return format;
 	}
-	
-        @Override
+
+	@Override
+	public String getMeFormat() {
+		return formatMe;
+	}
+
+	@Override
 	public String getColor() {
 		return color;
 	}
-	
-        @Override
+
+	@Override
 	public String getStringColor() {
 		return color2;
 	}
-	
-        @Override
+
+	@Override
 	public boolean isShortcutAllowed() {
 		return shortcut;
 	}
-	
-        @Override
+
+	@Override
 	public boolean isFocusNeeded() {
 		return focus;
 	}
-	
-        @Override
+
+	@Override
 	public boolean isCrossworlds() {
 		return crossworlds;
 	}
-	
-        @Override
+
+	@Override
 	public double getMaxDistance() {
 		return distance;
 	}
-	
-        @Override
+
+	@Override
 	public double getMessageCost() {
 		return cost;
 	}
-        @Override
+
+	@Override
 	public double getCostPerMessage() {
 		return cost;
 	}
-	
-        @Override
+
+	@Override
 	public boolean showCostMessage() {
 		return show_cost_msg;
 	}
-	
-        @Override
+
+	@Override
 	public int getDelayPerMessage() {
 		return delay;
 	}
-	
-        @Override
+
+	@Override
 	public void setNickname(String n) {
-		nick=n;
+		nick = n;
 	}
-	
-        @Override
+
+	@Override
 	public void setFormat(String n) {
-		format=n;
+		format = n;
 	}
-	
-        @Override
+
+	@Override
+	public void setMeFormat(String n) {
+		formatMe = n;
+	}
+
+	@Override
 	public void setColor(ChatColor c) {
-		color2=ChannelUtils.translateChatColorToStringColor(c);
-		color=ChannelUtils.translateStringColor(color2);
+		color2 = ChannelUtils.translateChatColorToStringColor(c);
+		color = ChannelUtils.translateStringColor(color2);
 	}
-	
-        @Override
+
+	@Override
 	public void setShortcutAllowed(boolean n) {
-		shortcut=n;
+		shortcut = n;
 	}
-	
-        @Override
+
+	@Override
 	public void setFocusNeeded(boolean n) {
-		focus=n;
+		focus = n;
 	}
-	
-        @Override
+
+	@Override
 	public void setCrossworlds(boolean n) {
-		crossworlds=n;
+		crossworlds = n;
 	}
-	
-        @Override
+
+	@Override
 	public void setMaxDistance(double n) {
-		distance=n;
+		distance = n;
 	}
-	
-        @Override
+
+	@Override
 	public void setMessageCost(double n) {
-		cost=n;
+		cost = n;
 	}
-        @Override
+
+	@Override
 	public void setCostPerMessage(double n) {
-		cost=n;
+		cost = n;
 	}
-	
-        @Override
+
+	@Override
 	public void setShowCostMessage(boolean n) {
-		show_cost_msg=n;
+		show_cost_msg = n;
 	}
-	
-        @Override
+
+	@Override
 	public void setDelayPerMessage(int n) {
-		delay=n;
+		delay = n;
 	}
-	
-        @Override
+
+	@Override
 	public List<Player> getPlayersFocusedInChannel() {
 		return Legendchat.getPlayerManager().getPlayersFocusedInChannel(this);
 	}
-	
-        @Override
+
+	@Override
 	public List<Player> getPlayersWhoCanSeeChannel() {
 		return Legendchat.getPlayerManager().getPlayersWhoCanSeeChannel(this);
 	}
-	
-        @Override
+
+	@Override
 	public void sendMessage(final String message) {
 		ChannelUtils.otherMessage(this, message);
 	}
-	
-        @Override
+
+	@Override
 	public void sendMessage(final Player sender, final String message) {
 		ChannelUtils.fakeMessage(this, sender, message);
 	}
-	
-        @Override
+
+	@Override
 	public void sendMessage(Player sender, String message, String bukkit_format, boolean cancelled) {
 		ChannelUtils.realMessage(this, sender, message, bukkit_format, cancelled);
 	}
-	
+
+	@Override
+	public void sendMe(Player sender, String message) {
+		ChannelUtils.fakeMe(this, sender, message);
+	}
+
+	@Override
+	public void sendMe(Player sender, String message, String bukkit_format, boolean cancelled) {
+		ChannelUtils.realMe(this, sender, message, bukkit_format, cancelled);
+	}
 }

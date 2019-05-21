@@ -112,9 +112,9 @@ public class ChannelManager {
 	private void loadChannel(File channel, String bungee) {
 		YamlConfiguration channel2 = YamlConfiguration.loadConfiguration(channel);
 		if(channel2.getString("name").toLowerCase().equals(bungee.toLowerCase()))
-			createPermanentChannel(new BungeecordChannel(channel2.getString("name"),channel2.getString("nickname"),channel2.getString("format"),channel2.getString("color"),channel2.getBoolean("shortcutAllowed"),channel2.getBoolean("needFocus"),channel2.getDouble("distance"),channel2.getBoolean("crossworlds"),channel2.getInt("delayPerMessage"),channel2.getDouble("costPerMessage"),channel2.getBoolean("showCostMessage")));
+			createPermanentChannel(new BungeecordChannel(channel2.getString("name"),channel2.getString("nickname"),channel2.getString("format"),channel2.getString("meFormat"),channel2.getString("color"),channel2.getBoolean("shortcutAllowed"),channel2.getBoolean("needFocus"),channel2.getDouble("distance"),channel2.getBoolean("crossworlds"),channel2.getInt("delayPerMessage"),channel2.getDouble("costPerMessage"),channel2.getBoolean("showCostMessage")));
 		else
-			createPermanentChannel(new PermanentChannel(channel2.getString("name"),channel2.getString("nickname"),channel2.getString("format"),channel2.getString("color"),channel2.getBoolean("shortcutAllowed"),channel2.getBoolean("needFocus"),channel2.getDouble("distance"),channel2.getBoolean("crossworlds"),channel2.getInt("delayPerMessage"),channel2.getDouble("costPerMessage"),channel2.getBoolean("showCostMessage")));
+			createPermanentChannel(new PermanentChannel(channel2.getString("name"),channel2.getString("nickname"),channel2.getString("format"),channel2.getString("meFormat"),channel2.getString("color"),channel2.getBoolean("shortcutAllowed"),channel2.getBoolean("needFocus"),channel2.getDouble("distance"),channel2.getBoolean("crossworlds"),channel2.getInt("delayPerMessage"),channel2.getDouble("costPerMessage"),channel2.getBoolean("showCostMessage")));
 	}
 	
 }

@@ -1,5 +1,6 @@
 enabled: true
 format: '{default}'
+meFormat: '{me}'
 color: GREEN
 shortcutAllowed: true
 needFocus: false

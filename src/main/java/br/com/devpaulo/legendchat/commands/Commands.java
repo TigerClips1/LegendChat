@@ -8,6 +8,8 @@ import org.bukkit.entity.Player;
 import br.com.devpaulo.legendchat.api.Legendchat;
 import java.util.Collections;
 import java.util.List;
+import java.util.StringJoiner;
+import net.md_5.bungee.api.ChatColor;
 import org.bukkit.command.PluginCommand;
 import org.bukkit.command.TabCompleter;
 
@@ -118,7 +120,22 @@ public class Commands implements CommandExecutor, TabCompleter {
 			}
 			return true;
 		} else if (cmd.getName().equalsIgnoreCase("me")) {
-
+            final Player p = sender instanceof Player ? (Player) sender: null;
+            StringJoiner msg = new StringJoiner(" ");
+            for(String s : args) {
+                msg.add(s);
+            }
+            if(p != null) {
+                Legendchat.getAfkManager().removeAfk(p);
+                
+				if(Legendchat.getPlayerManager().isPlayerFocusedInAnyChannel(p))
+					Legendchat.getPlayerManager().getPlayerFocusedChannel(p).sendMe(p, msg.toString());
+				else
+					p.sendMessage(Legendchat.getMessageManager().getMessage("error1"));
+                
+            } else {
+                Bukkit.getServer().broadcastMessage(ChatColor.ITALIC + "* Server " + msg.toString());
+            }
 			return true;
 		}
 		return false;

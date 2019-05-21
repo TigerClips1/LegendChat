@@ -10,6 +10,7 @@ import br.com.devpaulo.legendchat.api.Legendchat;
 
 public class TemporaryChannelConfig {
 	private String format = "";
+	private String formatMe = "";
 	private String color = "";
 	private String color2 = "";
 	private boolean shortcut = false;
@@ -37,6 +38,10 @@ public class TemporaryChannelConfig {
 	
 	public String getFormat() {
 		return format;
+	}
+	
+	public String getMeFormat() {
+		return formatMe;
 	}
 	
 	public String getColor() {
@@ -123,6 +128,7 @@ public class TemporaryChannelConfig {
 		YamlConfiguration c = YamlConfiguration.loadConfiguration(f);
 		enabled=c.getBoolean("enabled");
 		format=c.getString("format");
+		formatMe=c.getString("meFormat");
 		String color3 = c.getString("color");
 		color=translateStringColor(color3);
 		color2=color3.toLowerCase();

@@ -57,6 +57,8 @@ public class Main extends JavaPlugin implements PluginMessageListener {
 		else
 			getServer().getPluginManager().registerEvents(new Listeners_old(), this);
 		
+        // I'm not sure why this was changed from 'legendchat'?
+        // changed in commit ecc9ee682e5e2668c2bb6f8f90a6c03ace64a724 by @theresajayne
 		getServer().getMessenger().registerOutgoingPluginChannel(this, "agnc:agnc");
         getServer().getMessenger().registerIncomingPluginChannel(this, "agnc:agnc", this);
 		
@@ -113,9 +115,9 @@ public class Main extends JavaPlugin implements PluginMessageListener {
 		File channels = new File(getDataFolder(),"channels");
 		if(!channels.exists()) {
 			channels.mkdir();
-			Legendchat.getChannelManager().createPermanentChannel(new PermanentChannel("global","g","{default}","GRAY",true,false,0,true,0,0,true));
-			Legendchat.getChannelManager().createPermanentChannel(new PermanentChannel("local","l","{default}","YELLOW",true,false,60,false,0,0,true));
-			Legendchat.getChannelManager().createPermanentChannel(new BungeecordChannel("bungeecord","b","{bungeecord}","LIGHTPURPLE",true,false,0,false,0,0,true));
+			Legendchat.getChannelManager().createPermanentChannel(new PermanentChannel("global","g","{default}","{me}","GRAY",true,false,0,true,0,0,true));
+			Legendchat.getChannelManager().createPermanentChannel(new PermanentChannel("local","l","{default}","{me}","YELLOW",true,false,60,false,0,0,true));
+			Legendchat.getChannelManager().createPermanentChannel(new BungeecordChannel("bungeecord","b","{bungeecord}","{me}","LIGHTPURPLE",true,false,0,false,0,0,true));
 		}
 		
 		if(new Updater().updateChannels())
