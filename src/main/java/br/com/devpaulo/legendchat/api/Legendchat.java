@@ -16,6 +16,7 @@ import br.com.devpaulo.legendchat.channels.types.Channel;
 import br.com.devpaulo.legendchat.configurations.ConfigManager;
 import br.com.devpaulo.legendchat.delays.DelayManager;
 import br.com.devpaulo.legendchat.ignore.IgnoreManager;
+import br.com.devpaulo.legendchat.logs.ChannelHistory;
 import br.com.devpaulo.legendchat.logs.LogManager;
 import br.com.devpaulo.legendchat.messages.MessageManager;
 import br.com.devpaulo.legendchat.mutes.MuteManager;
@@ -32,9 +33,13 @@ public class Legendchat {
 	private static boolean isBungeecordActive = false;
 	private static boolean isCensorActive = false;
 	private static boolean logToFile = false;
+	private static boolean logLocations = false;
 	private static boolean useAsyncChat = false;
+	private static boolean useJoinChatHistory = false;
 	private static boolean maintainSpyMode = false;
 	private static int logToFileTime = 10;
+	private static int joinChatHistoryTime = 10;
+	private static int joinChatHistoryMax = 20;
 	private static Channel defaultChannel = null;
 	private static BungeecordChannel bungeecordChannel = null;
 	private static Plugin plugin = null;
@@ -52,6 +57,7 @@ public class Legendchat {
 	private static MuteManager mum = null;
 	private static CensorManager cem = null;
 	private static LogManager lm = null;
+	private static ChannelHistory ch = null;
 	private static TemporaryChannelManager tcm = null;
 	private static ConfigManager com = null;
 	private static AfkManager afk = null;
@@ -90,6 +96,10 @@ public class Legendchat {
 
 	public static LogManager getLogManager() {
 		return lm;
+	}
+	
+	public static ChannelHistory getChannelHistory() {
+		return ch;
 	}
 	
 	public static TemporaryChannelManager getTemporaryChannelManager() {
@@ -144,6 +154,14 @@ public class Legendchat {
 		return logToFile;
 	}
 	
+	public static boolean logLocations() {
+		return logLocations;
+	}
+	
+	public static boolean useJoinChatHistory() {
+		return useJoinChatHistory;
+	}
+	
 	public static boolean useAsyncChat() {
 		return useAsyncChat;
 	}
@@ -154,6 +172,14 @@ public class Legendchat {
 	
 	public static int getLogToFileTime() {
 		return logToFileTime;
+	}
+	
+	public static int getJoinChatHistoryTime() {
+		return joinChatHistoryTime;
+	}
+	
+	public static int getJoinChatHistoryMax() {
+		return joinChatHistoryMax;
 	}
 	
 	public static BungeecordChannel getBungeecordChannel() {
@@ -189,41 +215,46 @@ public class Legendchat {
 	}
 	
 	public static void load(boolean all) {
-		plugin=Bukkit.getPluginManager().getPlugin("Legendchat");
+		plugin = Bukkit.getPluginManager().getPlugin("Legendchat");
 		if(!all) {
-			cm=new ChannelManager();
-			pm=new PlayerManager();
-			mm=new MessageManager();
-			im=new IgnoreManager();
-			pmm=new PrivateMessageManager();
-			dm=new DelayManager();
-			mum=new MuteManager();
-			cem=new CensorManager();
-			lm=new LogManager();
-			tcm=new TemporaryChannelManager();
-			com=new ConfigManager();
-			afk=new AfkManager();
+			cm = new ChannelManager();
+			pm = new PlayerManager();
+			mm = new MessageManager();
+			im = new IgnoreManager();
+			pmm = new PrivateMessageManager();
+			dm = new DelayManager();
+			mum = new MuteManager();
+			cem = new CensorManager();
+			if(lm == null) lm = new LogManager();
+			if(ch == null) ch = new ChannelHistory();
+			tcm = new TemporaryChannelManager();
+			com = new ConfigManager();
+			afk = new AfkManager();
 			return;
 		}
 		FileConfiguration fc = Bukkit.getPluginManager().getPlugin("Legendchat").getConfig();
-		defaultChannel=Legendchat.getChannelManager().getChannelByName(fc.getString("default_channel","local").toLowerCase());
-		logToBukkit=fc.getBoolean("log_to_bukkit",false);
-		blockRepeatedTags=fc.getBoolean("block_repeated_tags",true);
-		showNoOneHearsYou=fc.getBoolean("show_no_one_hears_you",true);
-		forceRemoveDoubleSpacesFromBukkit=fc.getBoolean("force_remove_double_spaces_from_bukkit",true);
-		useAsyncChat=fc.getBoolean("use_async_chat_event",true);
-		sendFakeMessageToChat=fc.getBoolean("send_fake_message_to_chat",true);
-		blockShortcutsWhenCancelled=fc.getBoolean("block_shortcuts_when_cancelled",true);
-		maintainSpyMode=fc.getBoolean("maintain_spy_mode",false);
-		isBungeecordActive=Main.bungeeActive;
-		bungeecordChannel=(BungeecordChannel) getChannelManager().getChannelByName(fc.getString("bungeecord.channel","bungeecord"));
-		isCensorActive=fc.getBoolean("censor.use",true);
+		defaultChannel = Legendchat.getChannelManager().getChannelByName(fc.getString("default_channel", "local").toLowerCase());
+		logToBukkit = fc.getBoolean("log_to_bukkit", false);
+		blockRepeatedTags = fc.getBoolean("block_repeated_tags", true);
+		showNoOneHearsYou = fc.getBoolean("show_no_one_hears_you", true);
+		forceRemoveDoubleSpacesFromBukkit = fc.getBoolean("force_remove_double_spaces_from_bukkit", true);
+		useAsyncChat = fc.getBoolean("use_async_chat_event", true);
+		sendFakeMessageToChat = fc.getBoolean("send_fake_message_to_chat", true);
+		blockShortcutsWhenCancelled = fc.getBoolean("block_shortcuts_when_cancelled", true);
+		maintainSpyMode = fc.getBoolean("maintain_spy_mode", false);
+		isBungeecordActive = Main.bungeeActive;
+		bungeecordChannel = (BungeecordChannel) getChannelManager().getChannelByName(fc.getString("bungeecord.channel", "bungeecord"));
+		isCensorActive = fc.getBoolean("censor.use", true);
 		Legendchat.getCensorManager().loadCensoredWords(fc.getStringList("censor.censored_words"));
-		logToFile=fc.getBoolean("log_to_file.use",false);
-		logToFileTime=fc.getInt("log_to_file.time",10);
+		logToFile = fc.getBoolean("log_to_file.use", false);
+		logToFileTime = fc.getInt("log_to_file.time", 10);
+		logLocations = fc.getBoolean("log_to_file.save_locations", false);
 		if(logToFile)
 			lm.startSavingScheduler();
-		language=Main.language;
+		useJoinChatHistory = fc.getBoolean("rejoin_chatlog.use",false);
+		joinChatHistoryTime = fc.getInt("rejoin_chatlog.time", 10);
+		joinChatHistoryMax = fc.getInt("rejoin_chatlog.max", 20);
+		language = Main.language;
 		formats.clear();
 		pm_formats.clear();
 		for(String f : fc.getConfigurationSection("format").getKeys(false))

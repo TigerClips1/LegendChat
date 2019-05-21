@@ -23,6 +23,8 @@ public class Listeners implements Listener {
 	@EventHandler(priority = EventPriority.MONITOR)
 	private void onJoin(PlayerJoinEvent e) {
 		Legendchat.getPlayerManager().setPlayerFocusedChannel(e.getPlayer(), Legendchat.getDefaultChannel(), false);
+		if(Legendchat.useJoinChatHistory() && e.getPlayer().hasPermission("legendchat.chathistory"))
+			Legendchat.getChannelHistory().sendHistory(e.getPlayer());
 		if (Main.need_update != null && hasAnyPermission(e.getPlayer())) {
 			final Player p = e.getPlayer();
 			Bukkit.getServer().getScheduler().runTaskLater(Legendchat.getPlugin(), () -> {

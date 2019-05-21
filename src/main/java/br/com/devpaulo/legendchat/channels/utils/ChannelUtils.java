@@ -303,7 +303,10 @@ public class ChannelUtils {
 			Bukkit.getConsoleSender().sendMessage(completa);
 		
 		if(Legendchat.logToFile())
-			Legendchat.getLogManager().addLogToCache(ChatColor.stripColor(ChatColor.translateAlternateColorCodes('&', completa)));
+			Legendchat.getLogManager().addLogToCache(ChatColor.stripColor(ChatColor.translateAlternateColorCodes('&', completa)), sender.getLocation());
+		
+		if(Legendchat.useJoinChatHistory())
+			Legendchat.getChannelHistory().addLogToCache(c, ChatColor.translateAlternateColorCodes('&', completa));
 		
 		if(c instanceof BungeecordChannel) {
 			if(Legendchat.isBungeecordActive()) {
@@ -364,6 +367,9 @@ public class ChannelUtils {
 		
 		if(Legendchat.logToFile())
 			Legendchat.getLogManager().addLogToCache(ChatColor.stripColor(ChatColor.translateAlternateColorCodes('&', message)));
+		
+		if(Legendchat.useJoinChatHistory())
+			Legendchat.getChannelHistory().addLogToCache(c, ChatColor.translateAlternateColorCodes('&', message));
 	}
 	
 	public static String translateStringColor(String color) {

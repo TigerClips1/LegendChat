@@ -10,104 +10,137 @@ import java.util.HashMap;
 import java.util.List;
 
 import org.bukkit.Bukkit;
+import org.bukkit.Location;
 
 import br.com.devpaulo.legendchat.api.Legendchat;
 
 public class LogManager {
+
 	private final List<Log> log = new ArrayList<>();
+
 	public LogManager() {
 	}
-	
+
 	public void startSavingScheduler() {
-		Bukkit.getScheduler().runTaskTimer(Legendchat.getPlugin(), new Runnable() {
-                        @Override
-			public void run() {
-				saveLog();
-			}
-		}, Legendchat.getLogToFileTime()*1200, Legendchat.getLogToFileTime()*1200);
+		Bukkit.getScheduler().runTaskTimer(Legendchat.getPlugin(), () -> {
+			saveLog();
+		}, Legendchat.getLogToFileTime() * 1200, Legendchat.getLogToFileTime() * 1200);
 	}
-	
+
 	public void addLogToCache(Log l) {
-		if(!log.contains(l))
+		if (!log.contains(l)) {
 			log.add(l);
-	}
-	
-	public void addLogToCache(Date d, String m) {
-		log.add(new Log(d,m));
-	}
-	
-	public void addLogToCache(String m) {
-		log.add(new Log(new Date(),m));
+		}
 	}
 	
 	public void removeLogFromCache(Log l) {
-		if(log.contains(l))
-			log.remove(l);
+		log.remove(l);
 	}
-	
+
+	public void addLogToCache(Date d, String m, Location l) {
+		if (Legendchat.logLocations()) {
+			log.add(new Log(d, m, l));
+		} else {
+			log.add(new Log(d, m));
+		}
+	}
+
+	public void addLogToCache(String m, Location l) {
+		if (Legendchat.logLocations()) {
+			log.add(new Log(new Date(), m, l));
+		} else {
+			log.add(new Log(new Date(), m));
+		}
+	}
+
+	public void addLogToCache(String m) {
+		log.add(new Log(new Date(), m));
+	}
+
 	public List<Log> getLogCache() {
 		List<Log> log2 = new ArrayList<>();
 		log2.addAll(log);
 		return log2;
 	}
-	
+
 	public void saveLog() {
-		final List<Log> saving_log = getLogCache();
-		if(saving_log.isEmpty())
+		if (log.isEmpty()) {
 			return;
+		}
+		final List<Log> saving_log = getLogCache();
 		log.clear();
 		new Executor(saving_log).start();
 	}
-	
+
 	private class Executor extends Thread {
+
 		private List<Log> saving_log = null;
+
 		public Executor(List<Log> l) {
-			saving_log=l;
+			saving_log = l;
 		}
-		
-                @Override
+
+		@Override
 		public void run() {
-			File f2 = new File(Legendchat.getPlugin().getDataFolder(),"logs");
-			if(!f2.exists())
+			final boolean useLocation = Legendchat.logLocations();
+			File f2 = new File(Legendchat.getPlugin().getDataFolder(), "logs");
+			if (!f2.exists()) {
 				f2.mkdir();
-			HashMap<String,List<Log>> date_log = new HashMap<>();
-			for(Log l : saving_log) {
+			}
+			HashMap<String, List<Log>> date_log = new HashMap<>();
+			for (Log l : saving_log) {
 				String n = getFileName(l.getDate());
-				File f = new File(Legendchat.getPlugin().getDataFolder()+File.separator+"logs",n);
-				if(!f.exists()) {
-					try {f.createNewFile();} catch (Exception e) {}
+				File f = new File(Legendchat.getPlugin().getDataFolder() + File.separator + "logs", n);
+				if (!f.exists()) {
+					try {
+						f.createNewFile();
+					} catch (Exception e) {
+					}
 				}
-				if(date_log.containsKey(n))
+				if (date_log.containsKey(n)) {
 					date_log.get(n).add(l);
-				else {
+				} else {
 					List<Log> ll = new ArrayList<>();
 					ll.add(l);
 					date_log.put(n, ll);
 				}
 			}
-			for(String n : date_log.keySet()) {
-				File f = new File(Legendchat.getPlugin().getDataFolder()+File.separator+"logs",n);
-				BufferedWriter  writer = null;
+			for (String n : date_log.keySet()) {
+				File f = new File(Legendchat.getPlugin().getDataFolder() + File.separator + "logs", n);
+				BufferedWriter writer = null;
 				try {
 					writer = new BufferedWriter(new FileWriter(f, true));
-					for(Log l : date_log.get(n)) {
-						writer.write(formatLine(l.getDate(),l.getMessage()));
+					for (Log l : date_log.get(n)) {
+						if (useLocation) {
+							writer.write(formatLine(l.getDate(), l.getMessage(), l.getLocation()));
+						} else {
+							writer.write(formatLine(l.getDate(), l.getMessage()));
+						}
 						writer.newLine();
 					}
+				} catch (Exception e) {
+				} finally {
+					try {
+						writer.close();
+					} catch (Exception e) {
+					}
 				}
-				catch(Exception e) {}
-				finally {try {writer.close();} catch (Exception e) {}}
 			}
 		}
 	}
-	
+
 	private String getFileName(Date d) {
 		SimpleDateFormat df = new SimpleDateFormat("yyyy-MM-dd");
-		return df.format(d)+".txt";
+		return df.format(d) + ".txt";
 	}
-	
+
 	private String formatLine(Date d, String l) {
 		SimpleDateFormat df = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
-		return "["+df.format(d)+"] "+l;
+		return "[" + df.format(d) + "] " + l;
+	}
+
+	private String formatLine(Date d, String l, String location) {
+		SimpleDateFormat df = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+		return "[" + df.format(d) + "] [" + location + "] " + l;
 	}
 }

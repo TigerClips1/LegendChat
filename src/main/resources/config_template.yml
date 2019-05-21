@@ -8,6 +8,11 @@ log_to_bukkit: false
 log_to_file:
   use: false
   time: 10
+  save_locations: false
+rejoin_chatlog:
+  use: true
+  time: 10
+  max: 20
 block_repeated_tags: true
 show_no_one_hears_you: true
 block_shortcuts_when_cancelled: true
