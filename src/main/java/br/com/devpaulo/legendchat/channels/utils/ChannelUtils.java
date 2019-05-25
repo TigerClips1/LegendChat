@@ -262,6 +262,9 @@ public class ChannelUtils {
 				if(e.getTagValue("suffix").equals(e.getTagValue("groupsuffix")))
 					e.setTagValue("suffix", "");
 		}
+        if (Bukkit.getPluginManager().getPlugin("PlaceholderAPI") != null) {
+            completa = me.clip.placeholderapi.PlaceholderAPI.setBracketPlaceholders(sender, completa);
+        }
 		for (String n : e.getTags())
 			completa = completa.replace("{" + n + "}", ChatColor.translateAlternateColorCodes('&', e.getTagValue(n)));
 		completa = completa.replace("{msg}", translateAlternateChatColorsWithPermission(sender, message));
