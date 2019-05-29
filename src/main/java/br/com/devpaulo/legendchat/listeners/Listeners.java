@@ -13,7 +13,6 @@ import org.bukkit.event.player.PlayerCommandPreprocessEvent;
 import org.bukkit.event.player.PlayerJoinEvent;
 import org.bukkit.event.player.PlayerKickEvent;
 import org.bukkit.event.player.PlayerQuitEvent;
-import org.bukkit.permissions.PermissionAttachmentInfo;
 
 import br.com.devpaulo.legendchat.Main;
 import br.com.devpaulo.legendchat.api.Legendchat;
@@ -24,29 +23,7 @@ public class Listeners implements Listener {
 	@EventHandler(priority = EventPriority.MONITOR)
 	private void onJoin(PlayerJoinEvent e) {
 		final Player p = e.getPlayer();
-		final Channel cDef = Legendchat.getDefaultChannel();
-		// if this player can't join global, put them in a channel that they can join
-		boolean focused = false;
-		if(!p.hasPermission("legendchat.channel." + cDef.getName() + ".focus")) {
-			// try to put them in the first channel they can join
-			for (PermissionAttachmentInfo perms : p.getEffectivePermissions()) {
-				final String perm = perms.getPermission();
-				if(perm.startsWith("legendchat.channel.") && perm.endsWith(".focus")) {
-					// found one!
-					String chName = perm.substring("legendchat.channel.".length(), perm.length() - ".focus".length());
-					Channel ch = Legendchat.getChannelManager().getChannelByName(chName);
-					if(ch != null) {
-						Legendchat.getPlayerManager().setPlayerFocusedChannel(p, ch, false);
-						focused = true;
-						break;
-					}
-				}
-			}
-		}
-		// set this player's default channel to global
-		if(!focused) {
-			Legendchat.getPlayerManager().setPlayerFocusedChannel(p, cDef, false);
-		}
+		Legendchat.joinPlayerToDefault(p);
 		if (Legendchat.useJoinChatHistory() && p.hasPermission("legendchat.chathistory")) {
 			Legendchat.getChannelHistory().sendHistory(p);
 		}
@@ -119,14 +96,25 @@ public class Listeners implements Listener {
 	@EventHandler(ignoreCancelled = false, priority = EventPriority.MONITOR)
 	private void onChat2(AsyncPlayerChatEvent e) {
 		if (e.getMessage() != null && !chats.containsKey(e) && !e.isCancelled()) {
-			Legendchat.getAfkManager().removeAfk(e.getPlayer());
-			if (Legendchat.getPrivateMessageManager().isPlayerTellLocked(e.getPlayer())) {
-				Legendchat.getPrivateMessageManager().tellPlayer(e.getPlayer(), null, e.getMessage());
+			final Player p = e.getPlayer();
+			Legendchat.getAfkManager().removeAfk(p);
+			if (Legendchat.getPrivateMessageManager().isPlayerTellLocked(p)) {
+				Legendchat.getPrivateMessageManager().tellPlayer(p, null, e.getMessage());
 			} else {
-				if (Legendchat.getPlayerManager().isPlayerFocusedInAnyChannel(e.getPlayer())) {
-					Legendchat.getPlayerManager().getPlayerFocusedChannel(e.getPlayer()).sendMessage(e.getPlayer(), e.getMessage(), e.getFormat(), e.isCancelled());
+				if (Legendchat.getPlayerManager().isPlayerFocusedInAnyChannel(p)) {
+					Channel ch = Legendchat.getPlayerManager().getPlayerFocusedChannel(p);
+					// Edge case: did this player lose permission to be in this channel?
+					if(!p.hasPermission("legendchat.channel." + ch.getName().toLowerCase() + ".focus")) {
+						// if so, automagically move them to a channel that they can join
+						ch = Legendchat.joinPlayerToDefault(p);
+						if(ch == null) {
+							p.sendMessage(Legendchat.getMessageManager().getMessage("error1"));
+							return;
+						}
+					}
+					ch.sendMessage(p, e.getMessage(), e.getFormat(), e.isCancelled());
 				} else {
-					e.getPlayer().sendMessage(Legendchat.getMessageManager().getMessage("error1"));
+					p.sendMessage(Legendchat.getMessageManager().getMessage("error1"));
 				}
 			}
 		} else if (chats.containsKey(e)) {

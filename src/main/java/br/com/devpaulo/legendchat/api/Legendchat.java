@@ -22,6 +22,8 @@ import br.com.devpaulo.legendchat.messages.MessageManager;
 import br.com.devpaulo.legendchat.mutes.MuteManager;
 import br.com.devpaulo.legendchat.players.PlayerManager;
 import br.com.devpaulo.legendchat.privatemessages.PrivateMessageManager;
+import org.bukkit.entity.Player;
+import org.bukkit.permissions.PermissionAttachmentInfo;
 
 public class Legendchat {
 	private static boolean logToBukkit = false;
@@ -208,6 +210,30 @@ public class Legendchat {
 		return language;
 	}
 	
+	public static Channel joinPlayerToDefault(Player p) {
+		final Channel cDef = getDefaultChannel();
+		// if this player can't join global, put them in a channel that they can join
+		boolean focused = false;
+		if(cDef == null || !p.hasPermission("legendchat.channel." + cDef.getName() + ".focus")) {
+			// try to put them in the first channel they can join
+			for (PermissionAttachmentInfo perms : p.getEffectivePermissions()) {
+				final String perm = perms.getPermission();
+				if(perm.startsWith("legendchat.channel.") && perm.endsWith(".focus")) {
+					// found one!
+					String chName = perm.substring("legendchat.channel.".length(), perm.length() - ".focus".length());
+					Channel ch = Legendchat.getChannelManager().getChannelByName(chName);
+					if(ch != null) {
+						Legendchat.getPlayerManager().setPlayerFocusedChannel(p, ch, false);
+						return ch;
+					}
+				}
+			}
+		}
+		// set this player's default channel to global
+		getPlayerManager().setPlayerFocusedChannel(p, cDef, false);
+		return cDef;
+	}
+
 	public static HashMap<String,String> textToTag() {
 		HashMap<String,String> h = new HashMap<>();
 		h.putAll(text_to_tag);
