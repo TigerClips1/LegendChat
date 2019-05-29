@@ -13,6 +13,7 @@ import org.bukkit.event.player.PlayerCommandPreprocessEvent;
 import org.bukkit.event.player.PlayerJoinEvent;
 import org.bukkit.event.player.PlayerKickEvent;
 import org.bukkit.event.player.PlayerQuitEvent;
+import org.bukkit.permissions.PermissionAttachmentInfo;
 
 import br.com.devpaulo.legendchat.Main;
 import br.com.devpaulo.legendchat.api.Legendchat;
@@ -22,11 +23,34 @@ public class Listeners implements Listener {
 
 	@EventHandler(priority = EventPriority.MONITOR)
 	private void onJoin(PlayerJoinEvent e) {
-		Legendchat.getPlayerManager().setPlayerFocusedChannel(e.getPlayer(), Legendchat.getDefaultChannel(), false);
-		if(Legendchat.useJoinChatHistory() && e.getPlayer().hasPermission("legendchat.chathistory"))
-			Legendchat.getChannelHistory().sendHistory(e.getPlayer());
-		if (Main.need_update != null && hasAnyPermission(e.getPlayer())) {
-			final Player p = e.getPlayer();
+		final Player p = e.getPlayer();
+		final Channel cDef = Legendchat.getDefaultChannel();
+		// if this player can't join global, put them in a channel that they can join
+		boolean focused = false;
+		if(!p.hasPermission("legendchat.channel." + cDef.getName() + ".focus")) {
+			// try to put them in the first channel they can join
+			for (PermissionAttachmentInfo perms : p.getEffectivePermissions()) {
+				final String perm = perms.getPermission();
+				if(perm.startsWith("legendchat.channel.") && perm.endsWith(".focus")) {
+					// found one!
+					String chName = perm.substring("legendchat.channel.".length(), perm.length() - ".focus".length());
+					Channel ch = Legendchat.getChannelManager().getChannelByName(chName);
+					if(ch != null) {
+						Legendchat.getPlayerManager().setPlayerFocusedChannel(p, ch, false);
+						focused = true;
+						break;
+					}
+				}
+			}
+		}
+		// set this player's default channel to global
+		if(!focused) {
+			Legendchat.getPlayerManager().setPlayerFocusedChannel(p, cDef, false);
+		}
+		if (Legendchat.useJoinChatHistory() && p.hasPermission("legendchat.chathistory")) {
+			Legendchat.getChannelHistory().sendHistory(p);
+		}
+		if (Main.need_update != null && hasAnyPermission(p)) {
 			Bukkit.getServer().getScheduler().runTaskLater(Legendchat.getPlugin(), () -> {
 				p.sendMessage(ChatColor.GOLD + "[Legendchat] " + ChatColor.WHITE + "New update avaible: " + ChatColor.AQUA + "V" + Main.need_update + "!");
 				p.sendMessage(ChatColor.GOLD + "Download: " + ChatColor.WHITE + "http://dev.bukkit.org/bukkit-plugins/legendchat/");
