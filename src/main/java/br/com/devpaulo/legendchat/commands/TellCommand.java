@@ -98,8 +98,10 @@ public class TellCommand implements CommandExecutor, TabCompleter {
 						return true;
 					}
 					Legendchat.getPrivateMessageManager().lockPlayerTell(sender, to);
-					sender.sendMessage(Legendchat.getMessageManager().getMessage("message10").replace("@player", to.getName()));
-					if (to != console) {
+					if (to == console) {
+                        sender.sendMessage(Legendchat.getMessageManager().getMessage("message10").replace("@player", to.getName()));
+                    } else {
+                        sender.sendMessage(Legendchat.getMessageManager().getMessage("message10").replace("@player", ((Player)to).getDisplayName()));
 						if (Legendchat.getAfkManager().isAfk((Player) to)) {
 							sender.sendMessage(Legendchat.getMessageManager().getMessage("pm_error2_1"));
 							String mot = Legendchat.getAfkManager().getPlayerAfkMotive((Player) to);
