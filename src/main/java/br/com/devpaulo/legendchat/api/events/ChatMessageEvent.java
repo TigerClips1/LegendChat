@@ -27,6 +27,7 @@ public class ChatMessageEvent extends Event implements Cancellable {
 	private boolean cancelled = false;
 	private final HashMap<String,String> tags = new HashMap<>();
 	public ChatMessageEvent(Channel ch, Player sender, String message, String format, String base_format, String bukkit_format, Set<Player> recipients, HashMap<String,String> tags, boolean cancelled) {
+        super(Legendchat.useAsyncChat());
 		this.sender=sender;
 		this.message=message;
 		this.recipients.addAll(recipients);
@@ -150,7 +151,7 @@ public class ChatMessageEvent extends Event implements Cancellable {
 		tags.put(tag, value);
 	}
 	
-        @Override
+    @Override
 	public HandlerList getHandlers() {
 	    return handlers;
 	}
