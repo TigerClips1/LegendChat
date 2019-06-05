@@ -9,6 +9,7 @@ import br.com.devpaulo.legendchat.api.Legendchat;
 import br.com.devpaulo.legendchat.channels.utils.ChannelUtils;
 
 public class PermanentChannel implements Channel {
+
 	private String name = "";
 	private String nick = "";
 	private String format = "";

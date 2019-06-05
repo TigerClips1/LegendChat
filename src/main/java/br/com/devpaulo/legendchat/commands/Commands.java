@@ -121,26 +121,27 @@ public class Commands implements CommandExecutor, TabCompleter {
 			}
 			return true;
 		} else if (cmd.getName().equalsIgnoreCase("me")) {
-            final Player p = sender instanceof Player ? (Player) sender: null;
-            StringJoiner msg = new StringJoiner(" ");
-            for(String s : args) {
-                msg.add(s);
-            }
-            if(p != null) {
-                Legendchat.getAfkManager().removeAfk(p);
-                
-				if(Legendchat.getPlayerManager().isPlayerFocusedInAnyChannel(p))
+			final Player p = sender instanceof Player ? (Player) sender : null;
+			StringJoiner msg = new StringJoiner(" ");
+			for (String s : args) {
+				msg.add(s);
+			}
+			if (p != null) {
+				Legendchat.getAfkManager().removeAfk(p);
+
+				if (Legendchat.getPlayerManager().isPlayerFocusedInAnyChannel(p)) {
 					Legendchat.getPlayerManager().getPlayerFocusedChannel(p).sendMe(p, msg.toString());
-				else
+				} else {
 					p.sendMessage(Legendchat.getMessageManager().getMessage("error1"));
-                
-            } else {
-				for(Player pl : Bukkit.getOnlinePlayers()) {
+				}
+
+			} else {
+				for (Player pl : Bukkit.getOnlinePlayers()) {
 					// todo? custom formatting?
 					// not really an important feature, just a bit of fun.
 					pl.sendMessage(ChatColor.ITALIC + "Server " + msg.toString());
 				}
-            }
+			}
 			return true;
 		}
 		return false;
@@ -188,7 +189,7 @@ public class Commands implements CommandExecutor, TabCompleter {
 		}
 		sender.sendMessage(Legendchat.getMessageManager().getMessage("listcmd3").replace("@version", Legendchat.getPlugin().getDescription().getVersion()));
 	}
-	
+
 	protected static void sendHelpTempChannel(CommandSender sender) {
 		sender.sendMessage(Legendchat.getMessageManager().getMessage("listtc1"));
 		String msg2 = Legendchat.getMessageManager().getMessage("listtc2");

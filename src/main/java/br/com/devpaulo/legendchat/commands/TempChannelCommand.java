@@ -680,15 +680,15 @@ public class TempChannelCommand implements CommandExecutor, TabCompleter {
 	 */
 	@Override
 	public List<String> onTabComplete(CommandSender sender, Command command, String alias, String[] args) {
-		if(args.length == 1) {
+		if (args.length == 1) {
 			boolean admin = sender.hasPermission("legendchat.admin.tempchannel") || sender.hasPermission("legendchat.admin");
 			boolean manager = admin || sender.hasPermission("legendchat.tempchannel.manager");
 			boolean user = admin || sender.hasPermission("legendchat.tempchannel.user");
 			ArrayList<String> cmds = new ArrayList(Arrays.asList("mod", "member", "mods", "members", "leader", "invite", "kick", "list", "mychannels"));
-			if(manager) {
+			if (manager) {
 				cmds.addAll(Arrays.asList("create", "delete", "color"));
 			}
-			if(user) {
+			if (user) {
 				cmds.addAll(Arrays.asList("join", "leave"));
 			}
 			return cmds;

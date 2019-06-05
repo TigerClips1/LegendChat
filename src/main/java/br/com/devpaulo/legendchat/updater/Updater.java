@@ -22,13 +22,16 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 
 public class Updater {
+
 	private String version = "";
+
 	public Updater(String v) {
-		version=v;
+		version = v;
 	}
+
 	public Updater() {
 	}
-	
+
 	public String CheckNewVersion() throws Exception {
 		String v = "";
 		URL url = new URL("https://api.curseforge.com/servermods/files?projectIds=74494");
@@ -38,131 +41,142 @@ public class Updater {
 		conn.addRequestProperty("User-Agent", "Legendchat (by PauloABR)");
 		BufferedReader reader = null;
 		try {
-			reader=new BufferedReader(new InputStreamReader(conn.getInputStream()));
-		}
-		catch(Exception e) {
+			reader = new BufferedReader(new InputStreamReader(conn.getInputStream()));
+		} catch (Exception e) {
 			throw new Exception();
 		}
-        String response = reader.readLine();
-        JSONArray array = (JSONArray) JSONValue.parse(response);
-        if (array.size() > 0) {
-            JSONObject latest = (JSONObject) array.get(array.size() - 1);
-            v = ((String) latest.get("name")).split("\\(")[1].split("\\)")[0].replace("V", "");
-        }
-		else
+		String response = reader.readLine();
+		JSONArray array = (JSONArray) JSONValue.parse(response);
+		if (array.size() > 0) {
+			JSONObject latest = (JSONObject) array.get(array.size() - 1);
+			v = ((String) latest.get("name")).split("\\(")[1].split("\\)")[0].replace("V", "");
+		} else {
 			return null;
+		}
 		boolean f = false;
-		if(!version.equals(v)) {
+		if (!version.equals(v)) {
 			String[] v_obtained = v.split("\\.");
 			String[] v_here = version.split("\\.");
-			
+
 			boolean draw = true;
-			for(int i=0;i<(v_obtained.length>v_here.length?v_here.length:v_obtained.length);i++) {
+			for (int i = 0; i < (v_obtained.length > v_here.length ? v_here.length : v_obtained.length); i++) {
 				int n_obtained = Integer.parseInt(v_obtained[i]);
 				int n_here = Integer.parseInt(v_here[i]);
-				
-				if(n_obtained>n_here) {
-					f=true;
+
+				if (n_obtained > n_here) {
+					f = true;
 					break;
 				}
-				if(n_obtained<n_here) {
-					draw=false;
+				if (n_obtained < n_here) {
+					draw = false;
 					break;
 				}
 			}
-			
-			if(draw&&v_obtained.length>v_here.length)
-				f=true;
+
+			if (draw && v_obtained.length > v_here.length) {
+				f = true;
+			}
 		}
-		
-		String r = (f?v:null);
+
+		String r = (f ? v : null);
 		return r;
 	}
-	
+
 	private boolean updConfig = false;
 	private Plugin plugin = Bukkit.getPluginManager().getPlugin("Legendchat");
+
 	public boolean updateConfig() {
 		YamlConfiguration c;
 		try {
 			InputStreamReader is = new InputStreamReader(plugin.getResource(("config_template.yml").replace('\\', '/')));
 			c = YamlConfiguration.loadConfiguration(is);
-		} catch(NoSuchMethodError nsme) {
-            try {
-                Method loadConfigurationMethod = YamlConfiguration.class.getMethod("loadConfiguration", InputStream.class);
-                InputStream is = plugin.getResource(("config_template.yml").replace('\\', '/'));
-                c = (YamlConfiguration) loadConfigurationMethod.invoke(null, is);
-            } catch (Exception ex) {
-                Logger.getLogger(Updater.class.getName()).log(Level.SEVERE, "Updater Error", ex);
-                return false;
-            }
+		} catch (NoSuchMethodError nsme) {
+			try {
+				Method loadConfigurationMethod = YamlConfiguration.class.getMethod("loadConfiguration", InputStream.class);
+				InputStream is = plugin.getResource(("config_template.yml").replace('\\', '/'));
+				c = (YamlConfiguration) loadConfigurationMethod.invoke(null, is);
+			} catch (Exception ex) {
+				Logger.getLogger(Updater.class.getName()).log(Level.SEVERE, "Updater Error", ex);
+				return false;
+			}
 		}
-		for(String n : c.getConfigurationSection("").getKeys(true))
-			if(!has(n))
-				set(n,c.get(n));
-		if(updConfig)
+		for (String n : c.getConfigurationSection("").getKeys(true)) {
+			if (!has(n)) {
+				set(n, c.get(n));
+			}
+		}
+		if (updConfig) {
 			plugin.saveConfig();
+		}
 		return updConfig;
 	}
-	
+
 	private boolean has(String s) {
 		return plugin.getConfig().contains(s);
 	}
-	
-	private void set(String s,Object obj) {
+
+	private void set(String s, Object obj) {
 		plugin.getConfig().set(s, obj);
-		updConfig=true;
+		updConfig = true;
 	}
-	
+
 	private boolean updLang = false;
+
 	public boolean updateAndLoadLanguage(String language) {
-		File f = new File(plugin.getDataFolder(),"language"+File.separator+"language_"+language+".yml");
+		File f = new File(plugin.getDataFolder(), "language" + File.separator + "language_" + language + ".yml");
 		MessageManager m = Legendchat.getMessageManager();
 		m.registerLanguageFile(f);
 		m.loadMessages(f);
 		YamlConfiguration c;
 		try {
 			InputStreamReader is;
-			if ((is = new InputStreamReader(plugin.getResource(("language" + File.separator + "language_" + language + ".yml").replace('\\', '/')))) == null)
+			if ((is = new InputStreamReader(plugin.getResource(("language" + File.separator + "language_" + language + ".yml").replace('\\', '/')))) == null) {
 				is = new InputStreamReader(plugin.getResource(("language" + File.separator + "language_en.yml").replace('\\', '/')));
-			 c = YamlConfiguration.loadConfiguration(is);
+			}
+			c = YamlConfiguration.loadConfiguration(is);
 		} catch (NoSuchMethodError nsme) {
-            try {
-                Method loadConfigurationMethod = YamlConfiguration.class.getMethod("loadConfiguration", InputStream.class);
-                InputStream is;
-                if ((is = plugin.getResource(("language" + File.separator + "language_" + language + ".yml").replace('\\', '/'))) == null)
-                    is = plugin.getResource(("language" + File.separator + "language_en.yml").replace('\\', '/'));
-                c = (YamlConfiguration) loadConfigurationMethod.invoke(null, is);
-            } catch (Exception ex) {
-                Logger.getLogger(Updater.class.getName()).log(Level.SEVERE, "Updater Error", ex);
-                return false;
-            }
+			try {
+				Method loadConfigurationMethod = YamlConfiguration.class.getMethod("loadConfiguration", InputStream.class);
+				InputStream is;
+				if ((is = plugin.getResource(("language" + File.separator + "language_" + language + ".yml").replace('\\', '/'))) == null) {
+					is = plugin.getResource(("language" + File.separator + "language_en.yml").replace('\\', '/'));
+				}
+				c = (YamlConfiguration) loadConfigurationMethod.invoke(null, is);
+			} catch (Exception ex) {
+				Logger.getLogger(Updater.class.getName()).log(Level.SEVERE, "Updater Error", ex);
+				return false;
+			}
 		}
-		for(String n : c.getConfigurationSection("").getKeys(false))
-			if(!m.hasMessage(n))
-				addMessage(m,n,c.getString(n));
-		if(updLang)
+		for (String n : c.getConfigurationSection("").getKeys(false)) {
+			if (!m.hasMessage(n)) {
+				addMessage(m, n, c.getString(n));
+			}
+		}
+		if (updLang) {
 			m.loadMessages(f);
+		}
 		return updLang;
 	}
-	
+
 	private void addMessage(MessageManager m, String name, String msg) {
 		m.addMessageToFile(name, msg);
-		updLang=true;
+		updLang = true;
 	}
-	
+
 	public boolean updateChannels() {
 		boolean upd = false;
-		for (File channel : new File(Bukkit.getPluginManager().getPlugin("Legendchat").getDataFolder(),"channels").listFiles()) {
+		for (File channel : new File(Bukkit.getPluginManager().getPlugin("Legendchat").getDataFolder(), "channels").listFiles()) {
 			YamlConfiguration channel2 = YamlConfiguration.loadConfiguration(channel);
-			if(!channel2.contains("needFocus")) {
+			if (!channel2.contains("needFocus")) {
 				channel2.set("needFocus", false);
-				upd=true;
+				upd = true;
 			}
 			try {
 				channel2.save(channel);
-			} catch (IOException e) {}
+			} catch (IOException e) {
+			}
 		}
 		return upd;
 	}
-	
+
 }

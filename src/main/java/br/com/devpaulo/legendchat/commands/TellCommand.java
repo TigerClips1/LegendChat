@@ -99,9 +99,9 @@ public class TellCommand implements CommandExecutor, TabCompleter {
 					}
 					Legendchat.getPrivateMessageManager().lockPlayerTell(sender, to);
 					if (to == console) {
-                        sender.sendMessage(Legendchat.getMessageManager().getMessage("message10").replace("@player", to.getName()));
-                    } else {
-                        sender.sendMessage(Legendchat.getMessageManager().getMessage("message10").replace("@player", ((Player)to).getDisplayName()));
+						sender.sendMessage(Legendchat.getMessageManager().getMessage("message10").replace("@player", to.getName()));
+					} else {
+						sender.sendMessage(Legendchat.getMessageManager().getMessage("message10").replace("@player", ((Player) to).getDisplayName()));
 						if (Legendchat.getAfkManager().isAfk((Player) to)) {
 							sender.sendMessage(Legendchat.getMessageManager().getMessage("pm_error2_1"));
 							String mot = Legendchat.getAfkManager().getPlayerAfkMotive((Player) to);
@@ -162,7 +162,7 @@ public class TellCommand implements CommandExecutor, TabCompleter {
 		}
 		return Collections.EMPTY_LIST;
 	}
-	
+
 	public static List<String> getVisiblePlayerDisplaynames(final Player p, boolean includeSelf, String startingWith) {
 		startingWith = startingWith == null || startingWith.trim().isEmpty() ? null : startingWith.toLowerCase();
 		List<String> players = new ArrayList();
@@ -176,7 +176,7 @@ public class TellCommand implements CommandExecutor, TabCompleter {
 		}
 		return players;
 	}
-	
+
 	public static Player findPlayer(String player) {
 		Player found = Bukkit.getServer().getPlayer(player);
 		if (found == null) {

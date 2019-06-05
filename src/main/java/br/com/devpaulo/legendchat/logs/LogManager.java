@@ -32,7 +32,7 @@ public class LogManager {
 			log.add(l);
 		}
 	}
-	
+
 	public void removeLogFromCache(Log l) {
 		log.remove(l);
 	}

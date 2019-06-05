@@ -104,10 +104,10 @@ public class Listeners implements Listener {
 				if (Legendchat.getPlayerManager().isPlayerFocusedInAnyChannel(p)) {
 					Channel ch = Legendchat.getPlayerManager().getPlayerFocusedChannel(p);
 					// Edge case: did this player lose permission to be in this channel?
-					if(!p.hasPermission("legendchat.channel." + ch.getName().toLowerCase() + ".focus")) {
+					if (!p.hasPermission("legendchat.channel." + ch.getName().toLowerCase() + ".focus")) {
 						// if so, automagically move them to a channel that they can join
 						ch = Legendchat.joinPlayerToDefault(p);
-						if(ch == null) {
+						if (ch == null) {
 							p.sendMessage(Legendchat.getMessageManager().getMessage("error1"));
 							return;
 						}

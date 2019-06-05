@@ -70,7 +70,7 @@ public class ChannelCommand implements CommandExecutor, TabCompleter {
 				Legendchat.getIgnoreManager().playerIgnoreChannel((Player) sender, c);
 				sender.sendMessage(Legendchat.getMessageManager().getMessage("message18").replace("@channel", c.getName()));
 			}
-		} else if (cmd.getName().equalsIgnoreCase("channel"))  { // Channel focus
+		} else if (cmd.getName().equalsIgnoreCase("channel")) { // Channel focus
 			Channel c = null;
 			ChannelManager cm = Legendchat.getChannelManager();
 			c = cm.getChannelByName(args[0].toLowerCase());
@@ -107,7 +107,7 @@ public class ChannelCommand implements CommandExecutor, TabCompleter {
 	 */
 	@Override
 	public List<String> onTabComplete(CommandSender sender, Command command, String alias, String[] args) {
-		if(sender instanceof Player && args.length == 1) {
+		if (sender instanceof Player && args.length == 1) {
 			ArrayList<String> channels = new ArrayList();
 			for (Channel c : Legendchat.getChannelManager().getChannels()) {
 				final String cName = c.getName();

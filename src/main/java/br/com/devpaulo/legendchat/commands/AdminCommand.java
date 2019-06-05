@@ -58,10 +58,11 @@ public class AdminCommand implements CommandExecutor, TabCompleter {
 					return true;
 				}
 				HashMap<Player, String> focusedChannels = new HashMap();
-				for(Player p : Bukkit.getOnlinePlayers()) {
+				for (Player p : Bukkit.getOnlinePlayers()) {
 					Channel c = Legendchat.getPlayerManager().getPlayerFocusedChannel(p);
-					if(c != null)
+					if (c != null) {
 						focusedChannels.put(p, c.getName());
+					}
 				}
 				Legendchat.load(false);
 				Plugin lc = Bukkit.getPluginManager().getPlugin("Legendchat");
@@ -91,10 +92,11 @@ public class AdminCommand implements CommandExecutor, TabCompleter {
 					lc.getServer().getPluginManager().registerEvents(new Listeners_old(), lc);
 				}
 				Legendchat.load(true);
-				for(Map.Entry<Player, String> e : focusedChannels.entrySet()) {
+				for (Map.Entry<Player, String> e : focusedChannels.entrySet()) {
 					Channel c = Legendchat.getChannelManager().getChannelByName(e.getValue());
-					if(c != null)
+					if (c != null) {
 						Legendchat.getPlayerManager().setPlayerFocusedChannel(e.getKey(), c, false);
+					}
 				}
 				sender.sendMessage(Legendchat.getMessageManager().getMessage("message2"));
 				return true;
@@ -324,15 +326,15 @@ public class AdminCommand implements CommandExecutor, TabCompleter {
 		if (args.length == 1) {
 			boolean admin = sender.hasPermission("legendchat.admin");
 			ArrayList<String> cmds = new ArrayList();
-			for(String cmd : Arrays.asList("reload", "channel", "playerch", "spy", "hide", "mute", "unmute", "muteall")) {
-				if(admin || sender.hasPermission("legendchat.admin." + cmd)) {
+			for (String cmd : Arrays.asList("reload", "channel", "playerch", "spy", "hide", "mute", "unmute", "muteall")) {
+				if (admin || sender.hasPermission("legendchat.admin." + cmd)) {
 					cmds.add(cmd);
 				}
 			}
-			if(admin || sender.hasPermission("legendchat.admin.muteall")) {
+			if (admin || sender.hasPermission("legendchat.admin.muteall")) {
 				cmds.add("unmuteall");
 			}
-			if(admin || sender.hasPermission("legendchat.admin.tempchannel")) {
+			if (admin || sender.hasPermission("legendchat.admin.tempchannel")) {
 				cmds.add("deltc");
 			}
 			return cmds;

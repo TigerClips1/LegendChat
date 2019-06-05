@@ -28,6 +28,7 @@ import br.com.devpaulo.legendchat.updater.Updater;
 import java.util.logging.Level;
 
 public class Main extends JavaPlugin implements PluginMessageListener {
+
 	public static Permission perms = null;
 	public static Economy econ = null;
 	public static Chat chat = null;
@@ -37,172 +38,210 @@ public class Main extends JavaPlugin implements PluginMessageListener {
 	public static boolean bungeeActive = false;
 	public static String language = "en";
 	public static String need_update = null;
-	
+
 	@Override
-    public void onEnable() {
+	public void onEnable() {
 		getLogger().log(Level.INFO, "Legendchat (V{0}) - Author: SubZero0", getDescription().getVersion());
 		Legendchat.load(false);
-		
+
 		Commands c = new Commands();
 		PluginCommand pc;
-		for(String cmd : new String[]{"legendchat", "channel", "tell", "reply", "afk", "ignore", "tempchannel", "mute", "me"}) {
-			if((pc = getServer().getPluginCommand(cmd)) != null)
+		for (String cmd : new String[]{"legendchat", "channel", "tell", "reply", "afk", "ignore", "tempchannel", "mute", "me"}) {
+			if ((pc = getServer().getPluginCommand(cmd)) != null) {
 				c.registerCommand(pc);
-			else 
+			} else {
 				getLogger().warning("Failed to register command: " + cmd);
+			}
 		}
-		
-		if(getConfig().getBoolean("use_async_chat_event",true))
+
+		if (getConfig().getBoolean("use_async_chat_event", true)) {
 			getServer().getPluginManager().registerEvents(new Listeners(), this);
-		else
+		} else {
 			getServer().getPluginManager().registerEvents(new Listeners_old(), this);
-		
-        // I'm not sure why this was changed from 'legendchat'?
-        // changed in commit ecc9ee682e5e2668c2bb6f8f90a6c03ace64a724 by @theresajayne
+		}
+
+		// I'm not sure why this was changed from 'legendchat'?
+		// changed in commit ecc9ee682e5e2668c2bb6f8f90a6c03ace64a724 by @theresajayne
 		getServer().getMessenger().registerOutgoingPluginChannel(this, "agnc:agnc");
-        getServer().getMessenger().registerIncomingPluginChannel(this, "agnc:agnc", this);
-		
+		getServer().getMessenger().registerIncomingPluginChannel(this, "agnc:agnc", this);
+
 		boolean check_update = true;
-		if(getConfig().contains("check_for_updates"))
-			if(!getConfig().getBoolean("check_for_updates"))
-				check_update=false;
-		if(check_update) {
+		if (getConfig().contains("check_for_updates")) {
+			if (!getConfig().getBoolean("check_for_updates")) {
+				check_update = false;
+			}
+		}
+		if (check_update) {
 			getLogger().info("Checking for updates...");
 			try {
 				Updater vup = new Updater(getDescription().getVersion());
 				String vup_r = vup.CheckNewVersion();
-				if(vup_r==null)
+				if (vup_r == null) {
 					getLogger().info("No updates found.");
-				else {
+				} else {
 					getLogger().log(Level.INFO, "New update avaible: V{0}!", vup_r);
 					getLogger().info("Download: http://dev.bukkit.org/bukkit-plugins/legendchat/");
-					need_update=vup_r;
+					need_update = vup_r;
 				}
-			}
-			catch(Exception e) {
+			} catch (Exception e) {
 				getLogger().info("Error when checking for updates!");
 			}
 		}
-		
-		File file = new File(getDataFolder(),"config.yml");
-		if(!file.exists()) {
+
+		File file = new File(getDataFolder(), "config.yml");
+		if (!file.exists()) {
 			try {
-				saveResource("config_template.yml",false);
-				File file2 = new File(getDataFolder(),"config_template.yml");
-				file2.renameTo(new File(getDataFolder(),"config.yml"));
+				saveResource("config_template.yml", false);
+				File file2 = new File(getDataFolder(), "config_template.yml");
+				file2.renameTo(new File(getDataFolder(), "config.yml"));
+			} catch (Exception e) {
 			}
-			catch(Exception e) {}
 		}
 		reloadConfig();
-		
-		if(new Updater().updateConfig())
+
+		if (new Updater().updateConfig()) {
 			getLogger().info("Configuration file updated!");
-		
-		new File(getDataFolder(),"language").mkdir();
-		for(File f : getDataFolder().listFiles())
-			if(f.getName().startsWith("language_"))
-				try {Files.move(new File(getDataFolder(),f.getName()), new File(getDataFolder(),"language"+File.separator+f.getName()));} catch(Exception e) {}
-		
-		try {if(!new File(getDataFolder(),"language"+File.separator+"language_br.yml").exists()) {saveResource("language"+File.separator+"language_br.yml",false);getLogger().info("Saved language_br.yml");}}
-		catch(Exception e) {}
-		try {if(!new File(getDataFolder(),"language"+File.separator+"language_en.yml").exists()) {saveResource("language"+File.separator+"language_en.yml",false);getLogger().info("Saved language_en.yml");}}
-		catch(Exception e) {}
-		try {if(!new File(getDataFolder(),"language"+File.separator+"language_cn.yml").exists()) {saveResource("language"+File.separator+"language_cn.yml",false);getLogger().info("Saved language_cn.yml");}}
-		catch(Exception e) {}
-		try {if(!new File(getDataFolder(),"temporary_channels.yml").exists()) {saveResource("temporary_channels.yml",false);getLogger().info("Saved temporary_channels.yml");}}
-		catch(Exception e) {}
-		
-		File channels = new File(getDataFolder(),"channels");
-		if(!channels.exists()) {
-			channels.mkdir();
-			Legendchat.getChannelManager().createPermanentChannel(new PermanentChannel("global","g","{default}","{me}","GRAY",true,false,0,true,0,0,true));
-			Legendchat.getChannelManager().createPermanentChannel(new PermanentChannel("local","l","{default}","{me}","YELLOW",true,false,60,false,0,0,true));
-			Legendchat.getChannelManager().createPermanentChannel(new BungeecordChannel("bungeecord","b","{bungeecord}","{me}","LIGHTPURPLE",true,false,0,false,0,0,true));
 		}
-		
-		if(new Updater().updateChannels())
+
+		new File(getDataFolder(), "language").mkdir();
+		for (File f : getDataFolder().listFiles()) {
+			if (f.getName().startsWith("language_")) {
+				try {
+					Files.move(new File(getDataFolder(), f.getName()), new File(getDataFolder(), "language" + File.separator + f.getName()));
+				} catch (Exception e) {
+				}
+			}
+		}
+
+		try {
+			if (!new File(getDataFolder(), "language" + File.separator + "language_br.yml").exists()) {
+				saveResource("language" + File.separator + "language_br.yml", false);
+				getLogger().info("Saved language_br.yml");
+			}
+		} catch (Exception e) {
+		}
+		try {
+			if (!new File(getDataFolder(), "language" + File.separator + "language_en.yml").exists()) {
+				saveResource("language" + File.separator + "language_en.yml", false);
+				getLogger().info("Saved language_en.yml");
+			}
+		} catch (Exception e) {
+		}
+		try {
+			if (!new File(getDataFolder(), "language" + File.separator + "language_cn.yml").exists()) {
+				saveResource("language" + File.separator + "language_cn.yml", false);
+				getLogger().info("Saved language_cn.yml");
+			}
+		} catch (Exception e) {
+		}
+		try {
+			if (!new File(getDataFolder(), "temporary_channels.yml").exists()) {
+				saveResource("temporary_channels.yml", false);
+				getLogger().info("Saved temporary_channels.yml");
+			}
+		} catch (Exception e) {
+		}
+
+		File channels = new File(getDataFolder(), "channels");
+		if (!channels.exists()) {
+			channels.mkdir();
+			Legendchat.getChannelManager().createPermanentChannel(new PermanentChannel("global", "g", "{default}", "{me}", "GRAY", true, false, 0, true, 0, 0, true));
+			Legendchat.getChannelManager().createPermanentChannel(new PermanentChannel("local", "l", "{default}", "{me}", "YELLOW", true, false, 60, false, 0, 0, true));
+			Legendchat.getChannelManager().createPermanentChannel(new BungeecordChannel("bungeecord", "b", "{bungeecord}", "{me}", "LIGHTPURPLE", true, false, 0, false, 0, 0, true));
+		}
+
+		if (new Updater().updateChannels()) {
 			getLogger().info("Channels file updated!");
+		}
 		Legendchat.getChannelManager().loadChannels();
-		
-		language=getConfig().getString("language").trim();
-		if(new Updater().updateAndLoadLanguage(language))
+
+		language = getConfig().getString("language").trim();
+		if (new Updater().updateAndLoadLanguage(language)) {
 			getLogger().info("Language file updated!");
-		
+		}
+
 		if (!setupPermissions()) {
 			getLogger().warning("Vault is not linked to any permissions plugin.");
-			block_perms=true;
-        }
-		else {
-	        getLogger().info("Hooked to Vault (Permissions).");
+			block_perms = true;
+		} else {
+			getLogger().info("Hooked to Vault (Permissions).");
 		}
-		
+
 		if (!setupEconomy()) {
 			getLogger().warning("Vault is not linked to any economy plugin.");
-			block_econ=true;
-        }
-		else {
-	        getLogger().info("Hooked to Vault (Economy).");
+			block_econ = true;
+		} else {
+			getLogger().info("Hooked to Vault (Economy).");
 		}
-		
+
 		if (!setupChat()) {
 			getLogger().warning("Vault is not linked to any chat plugin.");
-			block_chat=true;
-        }
-		else {
-	        getLogger().info("Hooked to Vault (Chat).");
+			block_chat = true;
+		} else {
+			getLogger().info("Hooked to Vault (Chat).");
 		}
-		
-		if(getConfig().getBoolean("bungeecord.use",false))
-			if(Legendchat.getChannelManager().existsChannel(getConfig().getString("bungeecord.channel","bungeecord")))
-				bungeeActive=true;
-		
+
+		if (getConfig().getBoolean("bungeecord.use", false)) {
+			if (Legendchat.getChannelManager().existsChannel(getConfig().getString("bungeecord.channel", "bungeecord"))) {
+				bungeeActive = true;
+			}
+		}
+
 		Legendchat.load(true);
-		
-		for(Player p : getServer().getOnlinePlayers())
+
+		for (Player p : getServer().getOnlinePlayers()) {
 			Legendchat.getPlayerManager().setPlayerFocusedChannel(p, Legendchat.getDefaultChannel(), false);
+		}
 	}
-	
+
 	private boolean setupPermissions() {
-        if(getServer().getPluginManager().getPlugin("Vault")==null)
-            return false;
-        RegisteredServiceProvider<Permission> rsp = getServer().getServicesManager().getRegistration(Permission.class);
-        if(rsp==null)
-            return false;
-        perms = rsp.getProvider();
-        return perms != null;
-    }
-	
+		if (getServer().getPluginManager().getPlugin("Vault") == null) {
+			return false;
+		}
+		RegisteredServiceProvider<Permission> rsp = getServer().getServicesManager().getRegistration(Permission.class);
+		if (rsp == null) {
+			return false;
+		}
+		perms = rsp.getProvider();
+		return perms != null;
+	}
+
 	private boolean setupChat() {
-        if(getServer().getPluginManager().getPlugin("Vault")==null)
-        	return false;
-        RegisteredServiceProvider<Chat> rsp = getServer().getServicesManager().getRegistration(Chat.class);
-        if(rsp==null)
-            return false;
-        chat = rsp.getProvider();
-        return chat != null;
-    }
-	
+		if (getServer().getPluginManager().getPlugin("Vault") == null) {
+			return false;
+		}
+		RegisteredServiceProvider<Chat> rsp = getServer().getServicesManager().getRegistration(Chat.class);
+		if (rsp == null) {
+			return false;
+		}
+		chat = rsp.getProvider();
+		return chat != null;
+	}
+
 	private boolean setupEconomy() {
-        if(getServer().getPluginManager().getPlugin("Vault")==null)
-            return false;
-        RegisteredServiceProvider<Economy> rsp = getServer().getServicesManager().getRegistration(Economy.class);
-        if(rsp==null)
-            return false;
-        econ = rsp.getProvider();
-        return econ != null;
-    }
-	
+		if (getServer().getPluginManager().getPlugin("Vault") == null) {
+			return false;
+		}
+		RegisteredServiceProvider<Economy> rsp = getServer().getServicesManager().getRegistration(Economy.class);
+		if (rsp == null) {
+			return false;
+		}
+		econ = rsp.getProvider();
+		return econ != null;
+	}
+
 	@Override
-    public void onDisable() {
+	public void onDisable() {
 		getLogger().info("Disabling Legendchat - Author: SubZero0");
 		Legendchat.getLogManager().saveLog();
 	}
 
 	@Override
-    public void onPluginMessageReceived(String channel, Player player, byte[] message) {
-		if(Legendchat.isBungeecordActive()) {
-			if(!channel.equals("Legendchat"))
+	public void onPluginMessageReceived(String channel, Player player, byte[] message) {
+		if (Legendchat.isBungeecordActive()) {
+			if (!channel.equals("Legendchat")) {
 				return;
+			}
 			DataInputStream in = new DataInputStream(new ByteArrayInputStream(message));
 			String raw_tags = "";
 			String msg = "";
@@ -211,17 +250,18 @@ public class Main extends JavaPlugin implements PluginMessageListener {
 				msg = in.readUTF();
 			} catch (IOException e) {
 			}
-			HashMap<String,String> tags = new HashMap<>();
-			raw_tags = raw_tags.substring(1, raw_tags.length()-1);
+			HashMap<String, String> tags = new HashMap<>();
+			raw_tags = raw_tags.substring(1, raw_tags.length() - 1);
 			String[] pairs = raw_tags.split(",");
-			for(String separated_pairs : pairs) {
+			for (String separated_pairs : pairs) {
 				String[] pair = separated_pairs.split("=");
-				tags.put(pair[0].replace(" ", ""), (pair.length==1?"":pair[1]));
+				tags.put(pair[0].replace(" ", ""), (pair.length == 1 ? "" : pair[1]));
 			}
 			this.getServer().getLogger().log(Level.INFO, "[Legendchat] Incoming message from server {0}", tags.get("server"));
 			BungeecordChannel c = Legendchat.getBungeecordChannel();
-			if(c!=null)
+			if (c != null) {
 				c.sendBungeecordMessage(tags, msg);
+			}
 		}
-    }
+	}
 }
