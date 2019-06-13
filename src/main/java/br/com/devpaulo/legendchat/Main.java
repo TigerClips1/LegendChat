@@ -46,7 +46,7 @@ public class Main extends JavaPlugin implements PluginMessageListener {
 
 		Commands c = new Commands();
 		PluginCommand pc;
-		for (String cmd : new String[]{"legendchat", "channel", "tell", "reply", "afk", "ignore", "tempchannel", "mute", "me"}) {
+		for (String cmd : this.getDescription().getCommands().keySet()) {
 			if ((pc = getServer().getPluginCommand(cmd)) != null) {
 				c.registerCommand(pc);
 			} else {

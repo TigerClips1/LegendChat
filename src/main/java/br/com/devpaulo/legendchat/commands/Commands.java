@@ -40,6 +40,7 @@ public class Commands implements CommandExecutor, TabCompleter {
 				command.setTabCompleter(cmd);
 			}
 			break;
+			case "clearchat":
 			case "legendchat": {
 				AdminCommand cmd = new AdminCommand();
 				command.setExecutor(cmd);

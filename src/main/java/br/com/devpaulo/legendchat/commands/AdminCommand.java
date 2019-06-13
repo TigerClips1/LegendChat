@@ -45,7 +45,14 @@ public class AdminCommand implements CommandExecutor, TabCompleter {
 	 */
 	@Override
 	public boolean onCommand(CommandSender sender, Command cmd, String label, String[] args) {
-		if (args.length == 0) {
+		if (cmd.getName().equals("clearchat")) {
+			if (!sender.hasPermission("legendchat.admin.clearchat")) {
+				sender.sendMessage(Legendchat.getMessageManager().getMessage("error6"));
+				return true;
+			}
+			clearChat(sender);
+			return true;
+		} else if (args.length == 0) {
 			if (!hasAnyPermission(sender)) {
 				sender.sendMessage(Legendchat.getMessageManager().getMessage("error6"));
 				return true;
@@ -323,7 +330,7 @@ public class AdminCommand implements CommandExecutor, TabCompleter {
 	 */
 	@Override
 	public List<String> onTabComplete(CommandSender sender, Command command, String alias, String[] args) {
-		if (args.length == 1) {
+		if (args.length == 1 && command.getName().equals("legendchat")) {
 			boolean admin = sender.hasPermission("legendchat.admin");
 			ArrayList<String> cmds = new ArrayList();
 			for (String cmd : Arrays.asList("reload", "channel", "playerch", "spy", "hide", "mute", "unmute", "muteall")) {
@@ -354,4 +361,18 @@ public class AdminCommand implements CommandExecutor, TabCompleter {
 				|| sender.hasPermission("legendchat.admin.reload");
 	}
 
+	void clearChat(CommandSender sender) {
+		for (Player p : Bukkit.getOnlinePlayers()) {
+			if(p != sender) {
+				if (p.hasPermission("legendchat.admin.clearchat") || p.hasPermission("legendchat.admin")) {
+					p.sendMessage(Legendchat.getMessageManager().getMessage("cc1").replace("@player", sender.getName()));
+				} else {
+					for(int i = 0; i < 100; ++i) {
+						p.sendRawMessage("");
+					}
+				}
+			}
+		}
+		sender.sendMessage(Legendchat.getMessageManager().getMessage("cc1").replace("@player", sender.getName()));
+	}
 }

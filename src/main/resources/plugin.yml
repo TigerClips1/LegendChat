@@ -39,4 +39,8 @@ commands:
    me:
       description: Sends a status message to your channel
       usage: /<command> <message>
-       
+   clearchat:
+      description: Clear visible chat
+      usage: /<command>
+      aliases: cc
+      permission: legendchat.admin.clearchat
