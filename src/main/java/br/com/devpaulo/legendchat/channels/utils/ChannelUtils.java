@@ -175,7 +175,7 @@ public class ChannelUtils {
 					sender.sendMessage(Legendchat.getMessageManager().getMessage("error3").replace("@price", Double.toString(c.getMessageCost())));
 					return;
 				}
-				Main.econ.withdrawPlayer(sender, c.getMessageCost());
+				// witdraw if not canceled
 				gastou = true;
 			}
 		}
@@ -255,6 +255,8 @@ public class ChannelUtils {
 		Bukkit.getPluginManager().callEvent(e);
 		if (e.isCancelled()) {
 			return;
+		} else if(gastou) {
+			Main.econ.withdrawPlayer(sender, c.getMessageCost());
 		}
 		sender = e.getSender();
 		message = e.getMessage();
