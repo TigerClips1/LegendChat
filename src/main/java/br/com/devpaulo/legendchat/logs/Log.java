@@ -11,7 +11,7 @@ public class Log {
 	public Log(Date d, String m, Location l) {
 		date = d;
 		msg = m;
-		loc = String.format("%.1f %.1f %.1f %.1f %.1f %s", l.getX(), l.getY() + .1, l.getZ(), l.getYaw(), l.getPitch(), l.getWorld().getName());
+		loc = l == null ? "" : String.format("%.1f %.1f %.1f %.1f %.1f %s", l.getX(), l.getY() + .1, l.getZ(), l.getYaw(), l.getPitch(), l.getWorld().getName());
 	}
 
 	public Log(Date d, String m) {
