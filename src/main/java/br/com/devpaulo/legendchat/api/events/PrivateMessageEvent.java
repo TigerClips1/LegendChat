@@ -1,5 +1,6 @@
 package br.com.devpaulo.legendchat.api.events;
 
+import org.bukkit.Bukkit;
 import org.bukkit.command.CommandSender;
 import org.bukkit.event.Cancellable;
 import org.bukkit.event.Event;
@@ -14,6 +15,7 @@ public class PrivateMessageEvent extends Event implements Cancellable {
 	private String message = "";
 
 	public PrivateMessageEvent(CommandSender sender, CommandSender receiver, String message) {
+		super(!Bukkit.getServer().isPrimaryThread());
 		this.sender = sender;
 		this.receiver = receiver;
 		this.message = message;
