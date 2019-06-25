@@ -14,6 +14,7 @@ import org.bukkit.event.HandlerList;
 
 import br.com.devpaulo.legendchat.api.Legendchat;
 import br.com.devpaulo.legendchat.channels.types.Channel;
+import org.bukkit.Bukkit;
 
 public class ChatMessageEvent extends Event implements Cancellable {
 
@@ -29,7 +30,7 @@ public class ChatMessageEvent extends Event implements Cancellable {
 	private final HashMap<String, String> tags = new HashMap<>();
 
 	public ChatMessageEvent(Channel ch, Player sender, String message, String format, String base_format, String bukkit_format, Set<Player> recipients, HashMap<String, String> tags, boolean cancelled) {
-		super(Legendchat.useAsyncChat());
+		super(!Bukkit.getServer().isPrimaryThread());
 		this.sender = sender;
 		this.message = message;
 		this.recipients.addAll(recipients);
