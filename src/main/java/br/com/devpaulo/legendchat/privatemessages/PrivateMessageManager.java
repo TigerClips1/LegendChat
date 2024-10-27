@@ -5,13 +5,17 @@ import java.util.HashMap;
 import java.util.List;
 
 import org.bukkit.Bukkit;
-import org.bukkit.ChatColor;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
 
 import br.com.devpaulo.legendchat.afk.AfkManager;
 import br.com.devpaulo.legendchat.api.Legendchat;
 import br.com.devpaulo.legendchat.api.events.PrivateMessageEvent;
+import net.kyori.adventure.text.Component;
+import net.kyori.adventure.text.event.ClickEvent;
+import net.kyori.adventure.text.event.HoverEvent;
+import net.kyori.adventure.audience.Audience;
+import net.kyori.adventure.text.serializer.legacy.LegacyComponentSerializer;
 
 public class PrivateMessageManager {
 
@@ -56,7 +60,9 @@ public class PrivateMessageManager {
 
 		boolean ignored = false;
 		if (to != console && from != console) {
-			if (Legendchat.getIgnoreManager().hasPlayerIgnoredPlayer((Player) to, from.getName())) {
+			assert from instanceof Player;
+			assert to instanceof Player;
+			if (Legendchat.getIgnoreManager().hasPlayerIgnoredPlayer((Player) to, (Player) from)) {
 				ignored = true;
 			}
 		}
@@ -65,21 +71,38 @@ public class PrivateMessageManager {
 			setPlayerReply(to, from);
 		}
 
-		from.sendMessage(ChatColor.translateAlternateColorCodes('&', Legendchat.getPrivateMessageFormat("send"))
-				.replace("{sender}", fromName)
-				.replace("{receiver}", toName)
-				.replace("{msg}", msg));
-		if (!ignored) {
-			to.sendMessage(ChatColor.translateAlternateColorCodes('&', Legendchat.getPrivateMessageFormat("receive"))
-					.replace("{sender}", fromName)
-					.replace("{receiver}", toName)
-					.replace("{msg}", msg));
+		Component fromMessage = LegacyComponentSerializer.legacyAmpersand().deserialize(Legendchat.getPrivateMessageFormat("send")
+						.replace("{sender}", fromName)
+						.replace("{receiver}", toName)
+						.replace("{msg}", msg))
+				.hoverEvent(HoverEvent.showText(Component.text("Click to reply")))
+				.clickEvent(ClickEvent.suggestCommand("/msg " + toName + " "));
+
+		Component toMessage = LegacyComponentSerializer.legacyAmpersand().deserialize(Legendchat.getPrivateMessageFormat("receive")
+						.replace("{sender}", fromName)
+						.replace("{receiver}", toName)
+						.replace("{msg}", msg))
+				.hoverEvent(HoverEvent.showText(Component.text("Click to reply")))
+				.clickEvent(ClickEvent.suggestCommand("/msg " + fromName + " "));
+
+		if (from instanceof Audience) {
+			((Audience) from).sendMessage(fromMessage);
+		} else {
+			from.sendMessage(String.valueOf(fromMessage));
 		}
 
-		String spy = ChatColor.translateAlternateColorCodes('&', Legendchat.getPrivateMessageFormat("spy")
+		if (!ignored) {
+			if (to instanceof Audience) {
+				((Audience) to).sendMessage(toMessage);
+			} else {
+				to.sendMessage(String.valueOf(toMessage));
+			}
+		}
+
+		String spy = Legendchat.getPrivateMessageFormat("spy")
 				.replace("{sender}", fromName)
 				.replace("{receiver}", toName)
-				.replace("{ignored}", (ignored ? Legendchat.getMessageManager().getMessage("ignored") : "")))
+				.replace("{ignored}", (ignored ? Legendchat.getMessageManager().getMessage("ignored") : ""))
 				.replace("{msg}", msg);
 
 		for (Player p : Legendchat.getPlayerManager().getOnlineSpys()) {
@@ -93,7 +116,7 @@ public class PrivateMessageManager {
 		}
 
 		if (Legendchat.logToFile()) {
-			Legendchat.getLogManager().addLogToCache(ChatColor.stripColor(spy), from instanceof Player ? ((Player) from).getLocation() : null);
+			Legendchat.getLogManager().addLogToCache(spy, from instanceof Player ? ((Player) from).getLocation() : null);
 		}
 	}
 

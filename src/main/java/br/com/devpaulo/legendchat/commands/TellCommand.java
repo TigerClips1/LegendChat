@@ -10,6 +10,7 @@ import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.CommandSender;
 import org.bukkit.command.TabCompleter;
 import org.bukkit.entity.Player;
+import org.jetbrains.annotations.NotNull;
 
 public class TellCommand implements CommandExecutor, TabCompleter {
 
@@ -27,7 +28,7 @@ public class TellCommand implements CommandExecutor, TabCompleter {
 	 * @return true if a valid command, otherwise false
 	 */
 	@Override
-	public boolean onCommand(CommandSender sender, Command cmd, String label, String[] args) {
+	public boolean onCommand(@NotNull CommandSender sender, Command cmd, @NotNull String label, String[] args) {
 		if (cmd.getName().equalsIgnoreCase("ignore")) {
 			if (sender == Bukkit.getConsoleSender()) {
 				return false;
@@ -45,15 +46,15 @@ public class TellCommand implements CommandExecutor, TabCompleter {
 				sender.sendMessage(Legendchat.getMessageManager().getMessage("error9"));
 				return true;
 			}
-			if (Legendchat.getIgnoreManager().hasPlayerIgnoredPlayer((Player) sender, p.getName())) {
-				Legendchat.getIgnoreManager().playerUnignorePlayer((Player) sender, p.getName());
+			if (Legendchat.getIgnoreManager().hasPlayerIgnoredPlayer((Player) sender, p)) {
+				Legendchat.getIgnoreManager().playerUnignorePlayer((Player) sender, p);
 				sender.sendMessage(Legendchat.getMessageManager().getMessage("message15").replace("@player", p.getName()));
 			} else {
 				if (p.hasPermission("legendchat.block.ignore")) {
 					sender.sendMessage(Legendchat.getMessageManager().getMessage("error10"));
 					return true;
 				}
-				Legendchat.getIgnoreManager().playerIgnorePlayer((Player) sender, p.getName());
+				Legendchat.getIgnoreManager().playerIgnorePlayer((Player) sender, p);
 				sender.sendMessage(Legendchat.getMessageManager().getMessage("message14").replace("@player", p.getName()));
 			}
 			return true;
@@ -105,12 +106,9 @@ public class TellCommand implements CommandExecutor, TabCompleter {
 						if (Legendchat.getAfkManager().isAfk((Player) to)) {
 							sender.sendMessage(Legendchat.getMessageManager().getMessage("pm_error2_1"));
 							String mot = Legendchat.getAfkManager().getPlayerAfkMotive((Player) to);
-							if (mot != null) {
-								if (mot.length() > 0) {
-									sender.sendMessage(Legendchat.getMessageManager().getMessage("pm_error2_2").replace("@motive", mot));
-								}
+							if (mot != null && !mot.isEmpty()) {
+								sender.sendMessage(Legendchat.getMessageManager().getMessage("pm_error2_2").replace("@motive", mot));
 							}
-							//return true;
 						}
 					}
 				}
@@ -119,23 +117,20 @@ public class TellCommand implements CommandExecutor, TabCompleter {
 					if (Legendchat.getAfkManager().isAfk((Player) to)) {
 						sender.sendMessage(Legendchat.getMessageManager().getMessage("pm_error2_1"));
 						String mot = Legendchat.getAfkManager().getPlayerAfkMotive((Player) to);
-						if (mot != null) {
-							if (mot.length() > 0) {
-								sender.sendMessage(Legendchat.getMessageManager().getMessage("pm_error2_2").replace("@motive", mot));
-							}
+						if (mot != null && !mot.isEmpty()) {
+							sender.sendMessage(Legendchat.getMessageManager().getMessage("pm_error2_2").replace("@motive", mot));
 						}
 						return true;
 					}
 				}
-				String msg = "";
+				StringBuilder msg = new StringBuilder();
 				for (int i = 1; i < args.length; i++) {
-					if (msg.length() == 0) {
-						msg = args[i];
-					} else {
-						msg += " " + args[i];
+					if (!msg.isEmpty()) {
+						msg.append(" ");
 					}
+					msg.append(args[i]);
 				}
-				Legendchat.getPrivateMessageManager().tellPlayer(sender, to, msg);
+				Legendchat.getPrivateMessageManager().tellPlayer(sender, to, msg.toString());
 			}
 			return true;
 		}
@@ -146,7 +141,7 @@ public class TellCommand implements CommandExecutor, TabCompleter {
 	 * Requests a list of possible completions for a command argument.
 	 *
 	 * @param sender Source of the command. For players tab-completing a command
-	 * inside of a command block, this will be the player, not the command
+	 * inside a command block, this will be the player, not the command
 	 * block.
 	 * @param command Command which was executed
 	 * @param alias The alias used
@@ -156,7 +151,7 @@ public class TellCommand implements CommandExecutor, TabCompleter {
 	 * default to the command executor
 	 */
 	@Override
-	public List<String> onTabComplete(CommandSender sender, Command command, String alias, String[] args) {
+	public List<String> onTabComplete(@NotNull CommandSender sender, @NotNull Command command, @NotNull String alias, String[] args) {
 		if (sender instanceof Player && args.length == 1) {
 			return getVisiblePlayerDisplaynames((Player) sender, false, args[0]);
 		}
@@ -165,7 +160,7 @@ public class TellCommand implements CommandExecutor, TabCompleter {
 
 	public static List<String> getVisiblePlayerDisplaynames(final Player p, boolean includeSelf, String startingWith) {
 		startingWith = startingWith == null || startingWith.trim().isEmpty() ? null : startingWith.toLowerCase();
-		List<String> players = new ArrayList();
+		List<String> players = new ArrayList<>();
 		for (Player p2 : Bukkit.getOnlinePlayers()) {
 			if (p.getUniqueId().equals(p2.getUniqueId()) ? includeSelf : p.canSee(p2) && p2.getMetadata("vanished").isEmpty()) {
 				String n = p2.getDisplayName().replaceFirst("^[^A-Za-z0-9_]", "");

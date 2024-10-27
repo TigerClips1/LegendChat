@@ -1,23 +1,17 @@
 package br.com.devpaulo.legendchat.api.events;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
 
+import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.entity.Player;
 import org.bukkit.event.Cancellable;
 import org.bukkit.event.Event;
 import org.bukkit.event.HandlerList;
-
 import br.com.devpaulo.legendchat.api.Legendchat;
 import br.com.devpaulo.legendchat.channels.types.Channel;
-import org.bukkit.Bukkit;
 
 public class ChatMessageEvent extends Event implements Cancellable {
-
 	private static final HandlerList handlers = new HandlerList();
 	private String message = "";
 	private String format = "";
@@ -32,11 +26,12 @@ public class ChatMessageEvent extends Event implements Cancellable {
 	public ChatMessageEvent(Channel ch, Player sender, String message, String format, String base_format, String bukkit_format, Set<Player> recipients, HashMap<String, String> tags, boolean cancelled) {
 		super(!Bukkit.getServer().isPrimaryThread());
 		this.sender = sender;
-		this.message = message;
+		this.ch = ch;
+		this.message = applyMarkdown(message, ch.getColor());
 		this.recipients.addAll(recipients);
-		if (tags.values().contains(null)) {
-			List<String> ns = new ArrayList<>();
-			ns.addAll(tags.keySet());
+
+		if (tags.containsValue(null)) {
+			List<String> ns = new ArrayList<>(tags.keySet());
 			for (String n : ns) {
 				if (tags.get(n) == null) {
 					tags.remove(n);
@@ -46,7 +41,6 @@ public class ChatMessageEvent extends Event implements Cancellable {
 		}
 		this.tags.putAll(tags);
 		this.cancelled = cancelled;
-		this.ch = ch;
 		this.base_format = base_format;
 		this.bukkit_format = bukkit_format;
 		this.format = ChatColor.translateAlternateColorCodes('&', format);
@@ -62,16 +56,30 @@ public class ChatMessageEvent extends Event implements Cancellable {
 		}
 	}
 
+	private String applyMarkdown(String message, String baseColor) {
+		if (message == null) {
+			return "";
+		}
+
+		// Translate initial color codes using '&' symbols
+		message = ChatColor.translateAlternateColorCodes('&', message);
+
+		// Apply bold, italic, underline, and strikethrough formatting
+		message = message.replaceAll("\\*\\*\\*(.*?)\\*\\*\\*", ChatColor.BOLD.toString() + ChatColor.ITALIC + "$1" + ChatColor.RESET + baseColor);
+		message = message.replaceAll("\\*\\*(.*?)\\*\\*", ChatColor.BOLD + "$1" + ChatColor.RESET + baseColor);
+		message = message.replaceAll("\\*(.*?)\\*", ChatColor.ITALIC + "$1" + ChatColor.RESET + baseColor);
+		message = message.replaceAll("__(.*?)__", ChatColor.UNDERLINE + "$1" + ChatColor.RESET + baseColor);
+		message = message.replaceAll("~~(.*?)~~", ChatColor.STRIKETHROUGH + "$1" + ChatColor.RESET + baseColor);
+
+		return message;
+	}
+
 	public String getMessage() {
 		return message;
 	}
 
 	public void setMessage(String message) {
-		if (message == null) {
-			this.message = "";
-		} else {
-			this.message = message;
-		}
+		this.message = message == null ? "" : applyMarkdown(message, ch.getColor());
 	}
 
 	public String getFormat() {
@@ -80,7 +88,7 @@ public class ChatMessageEvent extends Event implements Cancellable {
 
 	public void setFormat(String format) {
 		if (format != null) {
-			this.format = format;
+			this.format = ChatColor.translateAlternateColorCodes('&', format);
 		}
 	}
 
@@ -125,9 +133,7 @@ public class ChatMessageEvent extends Event implements Cancellable {
 	}
 
 	public List<String> getTags() {
-		List<String> l = new ArrayList<>();
-		l.addAll(tags.keySet());
-		return l;
+		return new ArrayList<>(tags.keySet());
 	}
 
 	public boolean setTagValue(String tag, String value) {
@@ -138,8 +144,7 @@ public class ChatMessageEvent extends Event implements Cancellable {
 		if (!tags.containsKey(tag)) {
 			return false;
 		}
-		tags.remove(tag);
-		tags.put(tag, (value == null ? "" : value));
+		tags.put(tag, value == null ? "" : value);
 		return true;
 	}
 
@@ -147,11 +152,7 @@ public class ChatMessageEvent extends Event implements Cancellable {
 		if (tag == null) {
 			return null;
 		}
-		tag = tag.toLowerCase();
-		if (!tags.containsKey(tag)) {
-			return null;
-		}
-		return tags.get(tag);
+		return tags.get(tag.toLowerCase());
 	}
 
 	public void addTag(String tag, String value) {
@@ -159,13 +160,9 @@ public class ChatMessageEvent extends Event implements Cancellable {
 			return;
 		}
 		tag = tag.toLowerCase();
-		if (tags.containsKey(tag)) {
-			return;
+		if (!tags.containsKey(tag)) {
+			tags.put(tag, value == null ? "" : value);
 		}
-		if (value == null) {
-			value = "";
-		}
-		tags.put(tag, value);
 	}
 
 	@Override
