@@ -2,6 +2,7 @@ package br.com.devpaulo.legendchat.api.events;
 
 import java.util.*;
 
+import br.com.devpaulo.legendchat.channels.utils.ChannelUtils;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.entity.Player;
@@ -27,7 +28,7 @@ public class ChatMessageEvent extends Event implements Cancellable {
 		super(!Bukkit.getServer().isPrimaryThread());
 		this.sender = sender;
 		this.ch = ch;
-		this.message = applyMarkdown(message, ch.getColor());
+		this.message = applyMarkdown(sender, message, ch.getColor());
 		this.recipients.addAll(recipients);
 
 		if (tags.containsValue(null)) {
@@ -56,13 +57,13 @@ public class ChatMessageEvent extends Event implements Cancellable {
 		}
 	}
 
-	private String applyMarkdown(String message, String baseColor) {
+	private String applyMarkdown(Player player, String message, String baseColor) {
 		if (message == null) {
 			return "";
 		}
 
-		// Translate initial color codes using '&' symbols
-		message = ChatColor.translateAlternateColorCodes('&', message);
+		// Apply color codes with permissions
+		message = ChannelUtils.translateAlternateChatColorsWithPermission(player, message);
 
 		// Apply bold, italic, underline, and strikethrough formatting
 		message = message.replaceAll("\\*\\*\\*(.*?)\\*\\*\\*", ChatColor.BOLD.toString() + ChatColor.ITALIC + "$1" + ChatColor.RESET + baseColor);
@@ -79,7 +80,7 @@ public class ChatMessageEvent extends Event implements Cancellable {
 	}
 
 	public void setMessage(String message) {
-		this.message = message == null ? "" : applyMarkdown(message, ch.getColor());
+		this.message = message == null ? "" : applyMarkdown(sender, message, ch.getColor());
 	}
 
 	public String getFormat() {
@@ -88,7 +89,7 @@ public class ChatMessageEvent extends Event implements Cancellable {
 
 	public void setFormat(String format) {
 		if (format != null) {
-			this.format = ChatColor.translateAlternateColorCodes('&', format);
+			this.format = format;
 		}
 	}
 
