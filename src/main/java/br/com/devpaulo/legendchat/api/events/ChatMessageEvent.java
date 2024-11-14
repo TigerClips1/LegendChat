@@ -1,6 +1,8 @@
 package br.com.devpaulo.legendchat.api.events;
 
 import java.util.*;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 import br.com.devpaulo.legendchat.channels.utils.ChannelUtils;
 import org.bukkit.Bukkit;
@@ -65,15 +67,50 @@ public class ChatMessageEvent extends Event implements Cancellable {
 		// Apply color codes with permissions
 		message = ChannelUtils.translateAlternateChatColorsWithPermission(player, message);
 
-		// Apply bold, italic, underline, and strikethrough formatting
-		message = message.replaceAll("\\*\\*\\*(.*?)\\*\\*\\*", ChatColor.BOLD.toString() + ChatColor.ITALIC + "$1" + ChatColor.RESET + baseColor);
-		message = message.replaceAll("\\*\\*(.*?)\\*\\*", ChatColor.BOLD + "$1" + ChatColor.RESET + baseColor);
-		message = message.replaceAll("\\*(.*?)\\*", ChatColor.ITALIC + "$1" + ChatColor.RESET + baseColor);
-		message = message.replaceAll("__(.*?)__", ChatColor.UNDERLINE + "$1" + ChatColor.RESET + baseColor);
-		message = message.replaceAll("(?<!_)_(?!_)(.*?)_", ChatColor.ITALIC + "$1" + ChatColor.RESET + baseColor);
-		message = message.replaceAll("~~(.*?)~~", ChatColor.STRIKETHROUGH + "$1" + ChatColor.RESET + baseColor);
+		// Regular expressions for different markdown and colors
+		String boldItalicPattern = "\\*\\*\\*(.*?)\\*\\*\\*";
+		String boldPattern = "\\*\\*(.*?)\\*\\*";
+		String italicPattern = "(?<!_)_(?!_)(.*?)_|(?<!\\*)\\*(?!\\*)(.*?)\\*";
+		String underlinePattern = "__(.*?)__";
+		String italicUnderlinePattern = "___(.*?)___";
+		String strikethroughPattern = "~~(.*?)~~";
+
+		// Apply markdown formatting and preserve user-added color codes
+		message = applyPattern(message, boldItalicPattern, ChatColor.BOLD.toString() + ChatColor.ITALIC, baseColor);
+		message = applyPattern(message, boldPattern, ChatColor.BOLD.toString(), baseColor);
+		message = applyPattern(message, italicUnderlinePattern, ChatColor.ITALIC.toString() + ChatColor.UNDERLINE, baseColor);
+		message = applyPattern(message, italicPattern, ChatColor.ITALIC.toString(), baseColor);
+		message = applyPattern(message, underlinePattern, ChatColor.UNDERLINE.toString(), baseColor);
+		message = applyPattern(message, strikethroughPattern, ChatColor.STRIKETHROUGH.toString(), baseColor);
+
+		// Apply base color after reset code
+		message = message.replaceAll("[§&]r", ChatColor.RESET + baseColor);
 
 		return message;
+	}
+
+	private String applyPattern(String message, String pattern, String colorCode, String baseColor) {
+		Matcher matcher = Pattern.compile(pattern).matcher(message);
+		StringBuffer sb = new StringBuffer();
+		while (matcher.find()) {
+			String match = matcher.group(1) != null ? matcher.group(1) : matcher.group(2);
+			String beforeMatch = message.substring(0, matcher.start());
+			String lastColor = extractLastColor(beforeMatch);
+			String replacement = colorCode + match + ChatColor.RESET + baseColor + lastColor;
+			matcher.appendReplacement(sb, replacement);
+		}
+		matcher.appendTail(sb);
+		return sb.toString();
+	}
+
+	// Helper method to extract the last color code from a string
+	private String extractLastColor(String message) {
+		String lastColorCode = "";
+		Matcher matcher = Pattern.compile("([§&][0-9a-fk-or])").matcher(message);
+		while (matcher.find()) {
+			lastColorCode = matcher.group(1);
+		}
+		return lastColorCode;
 	}
 
 	public String getMessage() {
