@@ -70,6 +70,7 @@ public class ChatMessageEvent extends Event implements Cancellable {
 		message = message.replaceAll("\\*\\*(.*?)\\*\\*", ChatColor.BOLD + "$1" + ChatColor.RESET + baseColor);
 		message = message.replaceAll("\\*(.*?)\\*", ChatColor.ITALIC + "$1" + ChatColor.RESET + baseColor);
 		message = message.replaceAll("__(.*?)__", ChatColor.UNDERLINE + "$1" + ChatColor.RESET + baseColor);
+		message = message.replaceAll("(?<!_)_(?!_)(.*?)_", ChatColor.ITALIC + "$1" + ChatColor.RESET + baseColor);
 		message = message.replaceAll("~~(.*?)~~", ChatColor.STRIKETHROUGH + "$1" + ChatColor.RESET + baseColor);
 
 		return message;
