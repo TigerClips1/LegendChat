@@ -71,19 +71,25 @@ public class PrivateMessageManager {
 			setPlayerReply(to, from);
 		}
 
+		// Remove unwanted characters when creating the reply command
+		String cleanToName = toName.replaceFirst("^[^A-Za-z0-9_]", "");
+		String cleanFromName = fromName.replaceFirst("^[^A-Za-z0-9_]", "");
+
 		Component fromMessage = LegacyComponentSerializer.legacyAmpersand().deserialize(Legendchat.getPrivateMessageFormat("send")
 						.replace("{sender}", fromName)
 						.replace("{receiver}", toName)
 						.replace("{msg}", msg))
 				.hoverEvent(HoverEvent.showText(Component.text("Click to reply")))
-				.clickEvent(ClickEvent.suggestCommand("/msg " + toName + " "));
+				.hoverEvent(HoverEvent.showText(Component.text(Legendchat.getMessageManager().getMessage("reply_msg").replace("@player", toName))))
+				.clickEvent(ClickEvent.suggestCommand("/msg " + cleanToName + " "));
 
 		Component toMessage = LegacyComponentSerializer.legacyAmpersand().deserialize(Legendchat.getPrivateMessageFormat("receive")
 						.replace("{sender}", fromName)
 						.replace("{receiver}", toName)
 						.replace("{msg}", msg))
 				.hoverEvent(HoverEvent.showText(Component.text("Click to reply")))
-				.clickEvent(ClickEvent.suggestCommand("/msg " + fromName + " "));
+				.hoverEvent(HoverEvent.showText(Component.text(Legendchat.getMessageManager().getMessage("reply_msg").replace("@player", fromName))))
+				.clickEvent(ClickEvent.suggestCommand("/msg " + cleanFromName + " "));
 
 		if (from instanceof Audience) {
 			((Audience) from).sendMessage(fromMessage);

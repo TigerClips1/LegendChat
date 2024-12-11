@@ -118,3 +118,4 @@ tc_error25: '&6[Legendchat] &cThis player is not a moderator.'
 tc_error26: '&6[Legendchat] &cThe page number must be a number.'
 tc_error27: '&6[Legendchat] &cThe page number must be greater or equals than 1.'
 tc_error28: '&6[Legendchat] &cThe page number must be lower or equals than @maxpage.'
+reply_msg: "&7Click here to reply to &2@player"

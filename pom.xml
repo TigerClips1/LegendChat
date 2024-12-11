@@ -6,7 +6,7 @@
 
   <groupId>br.com.devpaulo</groupId>
   <artifactId>LegendChat</artifactId>
-  <version>1.21.1</version>
+  <version>1.2.1</version>
   <packaging>jar</packaging>
 
   <name>LegendChat</name>
