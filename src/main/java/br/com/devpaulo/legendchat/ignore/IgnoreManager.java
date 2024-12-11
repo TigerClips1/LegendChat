@@ -16,7 +16,7 @@ public class IgnoreManager {
 
 	private final Map<UUID, List<UUID>> IgnoreList = new HashMap<>();
 	private final Map<UUID, List<String>> MuteList = new HashMap<>();
-	private final File dataFile = new File("plugins/LegendChat/data/data.json");
+	private final File dataFile = new File("plugins/Legendchat/data/data.json");
 	private final Gson gson = new Gson();
 
 	public IgnoreManager() {
