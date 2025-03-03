@@ -26,6 +26,7 @@ public class ChatMessageEvent extends Event implements Cancellable {
 	private boolean cancelled = false;
 	private final HashMap<String, String> tags = new HashMap<>();
 
+	@Deprecated
 	public ChatMessageEvent(Channel ch, Player sender, String message, String format, String base_format, String bukkit_format, Set<Player> recipients, HashMap<String, String> tags, boolean cancelled) {
 		super(!Bukkit.getServer().isPrimaryThread());
 		this.sender = sender;
@@ -59,6 +60,7 @@ public class ChatMessageEvent extends Event implements Cancellable {
 		}
 	}
 
+	@Deprecated
 	private String applyMarkdown(Player player, String message, String baseColor) {
 		if (message == null) {
 			return "";
@@ -88,6 +90,7 @@ public class ChatMessageEvent extends Event implements Cancellable {
 
 		return message;
 	}
+	@Deprecated
 
 	private String applyPattern(String message, String pattern, String colorCode, String baseColor) {
 		Matcher matcher = Pattern.compile(pattern).matcher(message);

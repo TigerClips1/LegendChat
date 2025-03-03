@@ -1,0 +1,47 @@
+name: Legendchat
+author: SubZero0
+main: br.com.devpaulo.legendchat.Main
+version: 1.2.1
+softdepend: [Vault, PlaceholderAPI]
+load: STARTUP
+website: www.devpaulo.com.br
+api-version: 1.21
+commands:
+   legendchat:
+      description: Legendchat main command.
+      usage: /<command>
+      aliases: lc
+   channel:
+      description: Change your channel.
+      usage: /<command>
+      aliases: ch
+   tell:
+      description: Send a private message.
+      usage: /<command> <player> <message>
+      aliases: [msg, pm, t, whisper, w]
+   reply:
+      description: Reply a private message.
+      usage: /<command> <message>
+      aliases: r
+   afk:
+      description: Activate/Deactivate afk.
+      usage: /<command> [motive]
+   ignore:
+      description: Ignore a player.
+      usage: /<command> <player>
+   tempchannel:
+      description: Temporary channel main command.
+      usage: /<command>
+      aliases: tc
+   mute:
+      description: Ignore a channel.
+      usage: /<command> <channel>
+      aliases: leave
+   me:
+      description: Sends a status message to your channel
+      usage: /<command> <message>
+   clearchat:
+      description: Clear visible chat
+      usage: /<command>
+      aliases: cc
+      permission: legendchat.admin.clearchat
